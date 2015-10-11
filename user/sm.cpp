@@ -431,6 +431,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
           if(awaken_msg->vpn_label > 0)
             sendMPLSPacket(awaken_msg->destIp, destMac, awaken_msg->ifaceIndex, awaken_msg->msg,
                          awaken_msg->vpn_label, awaken_msg->tunnel_table);
+          arp_waiting_que.erase(ntohl(arp->arp_ip_source));
           return;
         }
       }
@@ -461,7 +462,20 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
     //****** Forward *****//
     else{
+      struct vrfi *vrfi_dest = getVPN(ntohl(iphdr->ip_dst.s_addr), vrf_table[interface_vpn[ifaceIndex]]);
+      struct tunnel_node *tunnel_dest = getTunnelNode(vrfi_dest->egress_ip);
 
+      struct msg_stored save_msg;
+      save_msg.egress_ip = node->egress_ip;
+      save_msg.ifaceIndex = node->ifaceIndex;
+      save_msg.destIp = destIp;
+      save_msg.msg = msg;
+      save_msg.vpn_label = vrfi_dest->vpn_label;
+      save_msg.tunnel_table = tunnel_node->tunnel_label;
+      arp_waiting_que[node->egress_ip] = &msg_stored;
+
+      sendARPReq(node->ifaceIndex, node->egress_ip);
+      return;
     }
     //****** End of Forward *****//    
   }
