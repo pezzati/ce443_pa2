@@ -66,12 +66,14 @@ struct default_node
 struct msg_stored
 {
   //struct default_node *node;
-  uint32_t egress_ip;
+  /*uint32_t egress_ip;
   int ifaceIndex;
   uint32_t destIp;
   string msg;
   int vpn_label;
-  int tunnel_label;
+  int tunnel_label;*/
+  uint8_t *data;
+  int length;
 };
 
 struct tunnel_node
@@ -80,15 +82,27 @@ struct tunnel_node
   int lsp;
   int tunnel_label;
 };
+
+
+struct label_routing_node
+{
+  int ingress_label;
+  int egress_label;
+  uint8_t nextMAC[6];
+  int egress_interface;
+};
 //*************************************************End of structs
 
 
 //*************************************************Vectors && Maps
+vector<string> vrf_name;
 map<string, struct vrf*> vrf_table;
 vector<struct default_node*> default_table;
 map<uint32_t, struct msg_stored*> arp_waiting_que;
 map<int, string> interface_vpn;
 vector<struct tunnel_node*> tunnel_table;
+vector<struct label_routing_node*> label_routing_table;
+map<uint32_t, > map;
 //*************************************************End of Vectors && Maps
 
 //*************************************************Statics
@@ -96,7 +110,7 @@ uint8_t broadcastMAC[6];
 //*************************************************End of Statics
 
 
-//*************************************************Functions
+//********************************************************************************************Functions
 uint32_t StrToIntIp(string str_ip){
   uint32_t ip;
   uint8_t ip_temp[4];
@@ -132,7 +146,7 @@ struct default_node* getDefault(uint32_t destIp){
   return NULL;
 }
 
-struct vrfi* getVPN(uint32_t destIp, struct vrf *vrf_dest){
+struct vrfi* getVRFi_inVRF(uint32_t destIp, struct vrf *vrf_dest){
   for(int i = 0; i < vrf_dest->vrfi_array->size(); i++)
     if((vrf_dest->vrfi_array->at(i)->ip & vrf_dest->vrfi_array->at(i)->mask) == (vrf_dest->vrfi_array->at(i)->mask & destIp))
       return vrf_dest->vrfi_array->at(i);
@@ -169,6 +183,97 @@ struct tunnel_node* getTunnelNode(uint32_t egress_ip){
       return tunnel_table.at(i);
   return NULL;
 }
+
+struct label_routing_node* getLabelNode(int ingress_label){
+  for(int i = 0; i < label_routing_table.size(), i++)
+    if(label_routing_table.at(i)->ingress_label == ingress_label)
+      return label_routing_table.at(i);
+  return NULL;
+}
+
+
+Frame* createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac, int ifaceIndex, int vpn_label, int tunnel_label, string msg){
+  //build UDP
+  //uint8_t *beginUdp = new uint8_t[msg.length() + sizeof(struct sr_udp)];
+  //struct sr_udp *udp_hdr = (struct sr_udp*)beginUdp;
+  struct sr_udp udp_hdr;
+  udp_hdr.port_src = htons(5000);
+  udp_hdr.port_dst = htons((uint16_t)3000);
+  udp_hdr.length = htons((uint16_t)(sizeof(sr_udp) + msg.length()));
+  udp_hdr.udp_sum = htons((uint16_t)0);
+
+  //IP
+  struct ip ip_header;
+  ip_header.ip_tos = 0;
+  ip_header.ip_id = htons((uint16_t)0);
+  ip_header.ip_off = htons((uint16_t)0);
+  ip_header.ip_src.s_addr = htonl(iface[ifaceIndex].getIp());
+  ip_header.ip_dst.s_addr = htonl(destIp);
+  ip_header.ip_p = IPPROTO_UDP;
+  ip_header.ip_ttl = 64;
+  ip_header.ip_hl = 5;
+  ip_header.ip_v = 4;
+  ip_header.ip_len = htons(sizeof(struct ip) + sizeof(struct sr_udp) + msg.length());
+  ip_header.ip_sum = 0x0000; 
+  ip_header.ip_sum = checksum((uint16_t *)&ip_header, sizeof(struct ip));
+
+
+  //********MPLS
+  //VPN label
+  struct mpls_label mpls_vpn;
+  //Tunnel label
+  struct mpls_label mpls_tunnel;
+  int vpn_size = 0;
+  int tunnel_size = 0;
+  if(vpn_label != -1){
+    vpn_size = 4;
+    //value
+    mpls_vpn.entry = vpn_label;
+    mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
+    //TC
+    mpls_vpn.entry = mpls_vpn.entry + (uint32_t)0;
+    mpls.entry = mpls_vpn.entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
+    //S
+    mpls_vpn.entry = mpls_vpn.entry + (uint32_t)1;
+    mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
+    //TTL
+    mpls_vpn.entry = mpls_vpn.entry + (uint32_t)0;
+  
+    tunnel_size = 4;
+    //value
+    mpls_tunnel.entry = tunnel_label;
+    mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
+    //TC
+    mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
+    mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
+    //S
+    mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
+    mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
+    //TTL
+    mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
+  }
+  
+  // build ethernet
+  struct sr_ethernet_hdr ethernet_hdr;
+  memcpy(ethernet_hdr.ether_dhost, destMac, 6);
+  memcpy(ethernet_hdr.ether_shost, iface[ifaceIndex].mac, 6);
+  ethernet_hdr.ether_type = htons(ETHERTYPE_ARP);
+
+
+  uint8_t *data = new uint8_t[sizeof(struct sr_ethernet_hdr) +  vpn_size + tunnel_size
+                   + sizeof(struct ip) + sizeof(struct stuct sr_udp) + msg.length()];
+  memcpy(data, &ethernet_hdr, sizeof(struct sr_ethernet_hdr));
+  memcpy(data + sizeof(struct sr_ethernet_hdr), &mpls_tunnel, tunnel_size);
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + tunnel_size, &mpls_vpn, vpn_size);
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size , &ip_header, sizeof(struct ip));
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size + sizeof(struct ip), &udp_hdr, sizeof(struct stuct sr_udp));
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size + sizeof(struct ip) + sizeof(struct stuct sr_udp), &msg, msg.length());
+
+  Frame frame( sizeof(struct sr_ethernet_hdr) + 4 * 2 + sizeof(struct ip) + sizeof(struct stuct sr_udp) + msg.length(), data);
+  return &frame;
+}
+
+
 
 void sendARPReq( int ifaceIndex, uint32_t egress_ip){
   //build ARP req
@@ -345,8 +450,78 @@ void sendMPLSPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string ms
   return;
 }
 
+void changeMPLSlabel(struct mpls_label *label, int egress_label){
+  uint32_t new_label = egress_label;
+  new_label = new_label << MPLS_LS_LABEL_SHIFT;
 
-//*************************************************End of Functions
+  label->entry = (label->entry & (~MPLS_LS_LABEL_MASK)) | new_label;
+}
+
+void forwardMPLSPacket(uint8_t *data, int length, struct label_routing_node *target_router){
+  struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct mpls_label));
+  changeMPLSlabel(label, target_router->egress_label);
+
+  struct sr_ethernet_hdr *ether = (struct sr_ethernet_hdr*)(data);
+  memcpy(ether->ether_shost, ether->ether_dhost, 6);
+  memcpy(ether->ether_dhost, target_router->nextMAC, 6);
+
+  Frame frame( length, data);
+  sendFrame(frame, target_router->egress_interface);
+  return;
+}
+
+
+struct vrfi* getVRFi(int vpn_label){
+  for(int i = 0; i < vrf_name.size(); i++){
+    struct vrf *vrf_temp = vrf_table[vrf_name.at(i)];
+    for(int j = 0; j < vrf_temp->vrfi_array.size(); j++)
+      if(vrf_temp->vrfi_array.at(j)->vpn_label == vpn_label)
+        return vrf_temp->vrfi_array.at(j);
+  }
+  return NULL;
+}
+
+string getVPNname(vpn_label){
+  for(int i = 0; i < vrf_name.size(); i++){
+    struct vrf *vrf_temp = vrf_table[vrf_name.at(i)];
+    for(int j = 0; j < vrf_temp->vrfi_array.size(); j++)
+      if(vrf_temp->vrfi_array.at(j)->vpn_label == vpn_label)
+        return vrf_name.at(i);
+  }
+  return NULL;
+}
+
+
+void handleVPNlabel(uint8_t *data, int length , int ifaceIndex){
+  struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
+  int vpn_label = (label->entry & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
+  struct vrfi *vrfi_dest = getVRFi(vpn_label);
+  if(vrfi_dest == NULL)
+    return;
+  string vpn = getVPNname(vpn_label);
+  for(int i = 0; i < default_table.size(); i++){
+    if(default_table.at(i)->ip & default_table.at(i)->mask == vrfi_dest->egress_ip & default_table.at(i)){
+      if(interface_vpn[default_table.at(i)->ifaceIndex] != vpn)
+        continue;
+      uint8_t *data_temp = new uint8_t[length - sizeof(struct mpls_label)];
+      memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
+      data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
+      memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
+      
+      
+      struct msg_stored msg_stored_temp;
+      msg_stored_temp.data = data_temp;
+      msg_stored_temp.length = length - sizeof(struct mpls_label);
+      if(arp_waiting_que[default_table.at(i)->egress_ip] != NULL)
+        arp_waiting_que.erase(default_table.at(i)->egress_ip);  
+      arp_waiting_que[default_table.at(i)->egress_ip] = &msg_stored_temp;
+      
+      sendARPReq(default_table.at(i)->ifaceIndex, default_table.at(i)->egress_ip);
+    }
+  }
+
+}
+//********************************************************************************************End of Functions
 
 SimulatedMachine::SimulatedMachine (const ClientFramework *cf, int count) :
 	Machine (cf, count) {
@@ -399,14 +574,31 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
 	//***************************************** MPLS *****************************************// 
   if(ntohs(ether->ether_type) == ETHERTYPE_MPLS){
-		//packet is on MPLS protocol
 		struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
-		if(label->s == 1){
-			//label is the last label of stack, thus is VPN label and must check the VRF table
-		}
-		else{
-			//label is Tunnel label, so we must use Tunneling table
-		}
+
+    int s = (label->entry & MPLS_LS_S_MASK) >> MPLS_LS_S_SHIFT;
+    //label is the VPN-label
+    if(s == 1){
+
+      return;
+    }
+
+    int ingress_label = (label->entry & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
+    struct label_routing_node *target_router = getLabelNode(ingress_label);
+    if(target_router == NULL)
+      return;
+    
+    if(target_router->egress_label == -1){ /* POP */
+      uint8_t *data_temp = new uint8_t[frame.length - sizeof(struct mpls_label)];
+      memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
+      data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
+      memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, frame.length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
+      handleVPNlabel(data, frame.length - sizeof(struct mpls_label), ifaceIndex);
+    }
+    if(target_router->egress_label != -1){ /* change label*/
+      forwardMPLSPacket(data, frame.length, target_router);
+      return;
+    }
 	}
   //***************************************** End of MPLS *****************************************//
 
@@ -426,11 +618,17 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
           struct msg_stored *awaken_msg = arp_waiting_que[ntohl(arp->arp_ip_source)];
           uint8_t destMac[6];
           memcpy(destMac, arp->arp_eth_source, 6);
-          if(awaken_msg->vpn_label == -1)
+          /*if(awaken_msg->vpn_label == -1)
             sendPacket(awaken_msg->destIp, destMac, awaken_msg->ifaceIndex, awaken_msg->msg);
           if(awaken_msg->vpn_label > 0)
             sendMPLSPacket(awaken_msg->destIp, destMac, awaken_msg->ifaceIndex, awaken_msg->msg,
-                         awaken_msg->vpn_label, awaken_msg->tunnel_table);
+                         awaken_msg->vpn_label, awaken_msg->tunnel_table);*/
+          uint8_t *data_temp = awaken_msg->data;
+          struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
+          memcpy(ether_dest->ether_dhost, destMac, 6);
+          Frame frame(awaken_msg->length, data_temp);
+          sendFrame(frame, ifaceIndex);
+
           arp_waiting_que.erase(ntohl(arp->arp_ip_source));
           return;
         }
@@ -462,16 +660,20 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
     //****** Forward *****//
     else{
-      struct vrfi *vrfi_dest = getVPN(ntohl(iphdr->ip_dst.s_addr), vrf_table[interface_vpn[ifaceIndex]]);
+      struct vrfi *vrfi_dest = getVRFi_inVRF(ntohl(iphdr->ip_dst.s_addr), vrf_table[interface_vpn[ifaceIndex]]);
       struct tunnel_node *tunnel_dest = getTunnelNode(vrfi_dest->egress_ip);
 
       struct msg_stored save_msg;
-      save_msg.egress_ip = node->egress_ip;
+      /*save_msg.egress_ip = node->egress_ip;
       save_msg.ifaceIndex = node->ifaceIndex;
       save_msg.destIp = destIp;
       save_msg.msg = msg;
       save_msg.vpn_label = vrfi_dest->vpn_label;
-      save_msg.tunnel_table = tunnel_node->tunnel_label;
+      save_msg.tunnel_table = tunnel_node->tunnel_label;*/
+      Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, ifaceIndex, vrfi_dest->vpn_label, tunnel_node->tunnel_label, msg);
+      save_msg.data = frame.data;
+      save_msg.length = frame.length;
+
       arp_waiting_que[node->egress_ip] = &msg_stored;
 
       sendARPReq(node->ifaceIndex, node->egress_ip);
@@ -504,7 +706,7 @@ void SimulatedMachine::run () {
         struct vrf *vrf_dest = vrf_table[str_vrfIndex];
         if(vrf_dest == NULL)
           return;
-        struct vrfi *vrfi_dest = getVPN(destIp, vrf_dest);
+        struct vrfi *vrfi_dest = getVRFi_inVRF(destIp, vrf_dest);
         if(vrfi_dest == NULL)
           return;
         
@@ -520,13 +722,20 @@ void SimulatedMachine::run () {
         if(tunnel_node == NULL)
           return;
 
-        struct msg_stored save_msg;
+        /*struct msg_stored save_msg;
         save_msg.egress_ip = node->egress_ip;
         save_msg.ifaceIndex = node->ifaceIndex;
         save_msg.destIp = destIp;
         save_msg.msg = msg;
         save_msg.vpn_label = vrfi_dest->vpn_label;
         save_msg.tunnel_table = tunnel_node->tunnel_label;
+        arp_waiting_que[node->egress_ip] = &msg_stored;*/
+
+        struct msg_stored save_msg;
+        Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, ifaceIndex, vrfi_dest->vpn_label, tunnel_node->tunnel_label, msg);
+        save_msg.data = frame.data;
+        save_msg.length = frame.length;
+
         arp_waiting_que[node->egress_ip] = &msg_stored;
 
         sendARPReq(node->ifaceIndex, node->egress_ip);
@@ -539,12 +748,18 @@ void SimulatedMachine::run () {
           cout << "Destination is unreachable" << endl;
           return;
         }
-        struct msg_stored save_msg;
+        /*struct msg_stored save_msg;
         save_msg.egress_ip = node->egress_ip;
         save_msg.ifaceIndex = node->ifaceIndex;
         save_msg.destIp = destIp;
         save_msg.msg = msg;
-        save_msg.vpn_label = -1;
+        save_msg.vpn_label = -1;*/
+
+        struct msg_stored save_msg;
+        Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, ifaceIndex, -1, -1, msg);
+        save_msg.data = frame.data;
+        save_msg.length = frame.length;
+
         arp_waiting_que[node->egress_ip] = &msg_stored;
 
         sendARPReq(node->ifaceIndex, node->egress_ip);
