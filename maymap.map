@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ptl:map xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ptl="http://partov.ce.sharif.edu/2013/PTL/Map" xsi:schemaLocation="http://partov.ce.sharif.edu/2013/PTL/Map map.xsd" ptl:name="dtn" ptl:version="3.4" ptl:count="50">
+
+  <ptl:links>
+    <ptl:repeat ptl:count="4">
+      <ptl:link ptl:name="lk-node" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    </ptl:repeat>
+  </ptl:links>
+  <ptl:nodes>
+    <ptl:plugin ptl:name="node0" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node0-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node0-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node0" ptl:running="true"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    
+    <ptl:plugin ptl:name="node1" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node1-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node1-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node0" ptl:running="true"/>
+  	  <ptl:connected-to-link ptl:name="lk-node1" ptl:running="true"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+
+    <ptl:repeat ptl:count="5">
+	  <ptl:plugin ptl:name="city" ptl:plugin-identifier="SimulatedNode">
+	    <ptl:interfaces>
+	      <ptl:ethernet-interface>
+	        <ptl:mac-address><ptl:var>city-mac</ptl:var></ptl:mac-address>
+	        <ptl:ip-address><ptl:var>city-ip</ptl:var></ptl:ip-address>
+	        <ptl:netmask>255.255.255.0</ptl:netmask>
+	        <ptl:connected-to-link ptl:name="lk-node" ptl:running="true"/>
+	      </ptl:ethernet-interface>
+	    </ptl:interfaces>
+	    <ptl:parameters>
+	      	<ptl:param ptl:name="custom-information">
+	          <ptl:value>30</ptl:value>
+	        </ptl:param>
+	    </ptl:parameters>
+	  </ptl:plugin>
+    </ptl:repeat>
+  </ptl:nodes>
+  <ptl:lists>
+    <ptl:mac ptl:name="node0-mac">
+      <ptl:item>00:24:8C:01:79:01</ptl:item>
+      <ptl:item>00:24:8C:01:79:04</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node0-ip">
+      <ptl:item>192.168.111.2</ptl:item>
+      <ptl:item>192.168.112.2</ptl:item>
+    </ptl:ipv4>
+    <ptl:mac ptl:name="node1-mac">
+      <ptl:item>00:24:8C:01:80:01</ptl:item>
+      <ptl:item>00:24:8C:01:80:04</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node1-ip">
+      <ptl:item>192.168.113.2</ptl:item>
+      <ptl:item>192.168.114.2</ptl:item>
+    </ptl:ipv4>
+    <ptl:mac ptl:name="city-mac">
+      <ptl:item>00:24:8C:01:80:01</ptl:item>
+      <ptl:item>00:24:8C:01:80:04</ptl:item>
+      <ptl:item>00:24:8C:01:80:06</ptl:item>
+      <ptl:item>00:24:8C:01:80:07</ptl:item>
+      <ptl:item>00:24:8C:01:80:0</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="city-ip">
+      <ptl:item>192.168.123.1</ptl:item>
+      <ptl:item>192.168.124.2</ptl:item>
+      <ptl:item>192.168.125.3</ptl:item>
+      <ptl:item>192.168.126.2</ptl:item>
+      <ptl:item>192.168.127.3</ptl:item>
+    </ptl:ipv4>
+  </ptl:lists>
+</ptl:map>
