@@ -66,6 +66,16 @@
             <ptl:value>0            vpn-A</ptl:value>
             <ptl:value>1            --</ptl:value>
             <ptl:value>2            vpn-B</ptl:value>
+
+            <ptl:value>VRF Tables</ptl:value>
+            <ptl:value>vpn-A</ptl:value>
+            <ptl:value>IP            MASK            VPN-Label      Out-IP</ptl:value>
+            <ptl:value>192.168.111.0 255.255.255.252 20             192.168.111.2 </ptl:value>
+            <ptl:value>192.168.119.0 255.255.255.252 21             192.168.113.2 </ptl:value>
+            <ptl:value>vpn-B</ptl:value>
+            <ptl:value>IP            MASK            VPN-Label      Out-IP</ptl:value>
+            <ptl:value>192.168.121.0 255.255.255.252 30             192.168.121.2 </ptl:value>
+            <ptl:value>192.168.117.0 255.255.255.252 21             192.168.113.2 </ptl:value>
           </ptl:param>
       </ptl:parameters>
     </ptl:plugin>
@@ -118,6 +128,7 @@
             <ptl:value>Interface    VPN-Name</ptl:value>
             <ptl:value>0            --</ptl:value>
             <ptl:value>1            --</ptl:value>
+
           </ptl:param>
       </ptl:parameters>
     </ptl:plugin>
@@ -159,6 +170,16 @@
             <ptl:value>0            --</ptl:value>
             <ptl:value>1            vpn-B</ptl:value>
             <ptl:value>2            vpn-A</ptl:value>
+
+            <ptl:value>VRF Tables</ptl:value>
+            <ptl:value>vpn-A</ptl:value>
+            <ptl:value>IP            MASK            VPN-Label      Out-IP</ptl:value>
+            <ptl:value>192.168.111.0 255.255.255.252 20             192.168.115.1 </ptl:value>
+            <ptl:value>192.168.119.0 255.255.255.252 21             192.168.119.2 </ptl:value>
+            <ptl:value>vpn-B</ptl:value>
+            <ptl:value>IP            MASK            VPN-Label      Out-IP</ptl:value>
+            <ptl:value>192.168.121.0 255.255.255.252 30             192.168.115.1 </ptl:value>
+            <ptl:value>192.168.117.0 255.255.255.252 21             192.168.117.2 </ptl:value>
           </ptl:param>
       </ptl:parameters>
     </ptl:plugin>
@@ -220,7 +241,7 @@
           <ptl:param ptl:name="custom-information">
             <ptl:value>Default Table</ptl:value>
             <ptl:value>192.168.119.0 255.255.0.0 192.168.119.1 0</ptl:value>
-            
+
             <ptl:value>Interface-VPN Table</ptl:value>
             <ptl:value>Interface    VPN-Name</ptl:value>
             <ptl:value>0            --</ptl:value>
