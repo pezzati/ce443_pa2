@@ -2,10 +2,11 @@
 <ptl:map xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ptl="http://partov.ce.sharif.edu/2013/PTL/Map" xsi:schemaLocation="http://partov.ce.sharif.edu/2013/PTL/Map map.xsd" ptl:name="dtn" ptl:version="3.4" ptl:count="50">
 
   <ptl:links>
-    <ptl:repeat ptl:count="4">
+    <ptl:repeat ptl:count="6">
       <ptl:link ptl:name="lk-node" ptl:protocol="802.3" ptl:log="true"></ptl:link>
     </ptl:repeat>
   </ptl:links>
+
   <ptl:nodes>
     <ptl:plugin ptl:name="node0" ptl:plugin-identifier="SimulatedNode">
       <ptl:interfaces>
@@ -18,7 +19,8 @@
       </ptl:interfaces>
       <ptl:parameters>
 	      	<ptl:param ptl:name="custom-information">
-	          <ptl:value>30</ptl:value>
+	          <ptl:value>Default Table</ptl:value>
+            <ptl:value>192.168.111.0 255.255.0.0 192.168.111.1 0</ptl:value>
 	        </ptl:param>
 	    </ptl:parameters>
     </ptl:plugin>
@@ -28,7 +30,7 @@
         <ptl:ethernet-interface>
           <ptl:mac-address-ref>node1-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node1-interface0-ip</ptl:ip-address-ref>
-          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:netmask>255.255.255.252</ptl:netmask>
           <ptl:connected-to-link ptl:name="lk-node0" ptl:running="true"/>
         </ptl:ethernet-interface>
 	<ptl:ethernet-interface>
@@ -37,7 +39,24 @@
           <ptl:netmask>255.255.255.0</ptl:netmask>
   	  <ptl:connected-to-link ptl:name="lk-node1" ptl:running="true"/>
         </ptl:ethernet-interface>
+	<ptl:ethernet-interface>
+          <ptl:mac-address-ref>node1-interface2-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node1-interface2-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.252</ptl:netmask>
+  	  <ptl:connected-to-link ptl:name="lk-node4" ptl:running="true"/>
+        </ptl:ethernet-interface>
       </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+            <ptl:value>192.168.111.0 255.255.255.252 192.168.111.2 0</ptl:value>
+            <ptl:value>192.168.121.0 255.255.255.252 192.168.121.2 2</ptl:value>
+            <ptl:value>192.168.113.0 255.255.255.0 192.168.113.2 1</ptl:value>
+            <ptl:value>192.168.115.0 255.255.255.0 192.168.113.2 1</ptl:value>
+            <ptl:value>192.168.117.0 255.255.255.0 192.168.113.2 1</ptl:value>
+            <ptl:value>192.168.119.0 255.255.255.0 192.168.113.2 1</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
     </ptl:plugin>
 <!--
     <ptl:repeat ptl:count="5">
@@ -74,6 +93,17 @@
   	  <ptl:connected-to-link ptl:name="lk-node2" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+            <ptl:value>192.168.111.0 255.255.255.252 192.168.113.1 0</ptl:value>
+            <ptl:value>192.168.121.0 255.255.255.252 192.168.113.1 0</ptl:value>
+            <ptl:value>192.168.113.0 255.255.255.0 192.168.113.1 0</ptl:value>
+            <ptl:value>192.168.115.0 255.255.255.0 192.168.115.2 1</ptl:value>
+            <ptl:value>192.168.117.0 255.255.255.0 192.168.115.2 1</ptl:value>
+            <ptl:value>192.168.119.0 255.255.255.0 192.168.115.2 1</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
     </ptl:plugin>
 
 
@@ -91,7 +121,24 @@
           <ptl:netmask>255.255.255.0</ptl:netmask>
   	  <ptl:connected-to-link ptl:name="lk-node3" ptl:running="true"/>
         </ptl:ethernet-interface>
+	<ptl:ethernet-interface>
+          <ptl:mac-address-ref>node3-interface2-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node3-interface2-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+  	  <ptl:connected-to-link ptl:name="lk-node5" ptl:running="true"/>
+        </ptl:ethernet-interface>
       </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+            <ptl:value>192.168.111.0 255.255.255.252 192.168.115.1 0</ptl:value>
+            <ptl:value>192.168.121.0 255.255.255.252 192.168.115.1 0</ptl:value>
+            <ptl:value>192.168.113.0 255.255.255.0 192.168.115.1 0</ptl:value>
+            <ptl:value>192.168.115.0 255.255.255.0 192.168.115.1 0</ptl:value>
+            <ptl:value>192.168.117.0 255.255.255.0 192.168.117.2 1</ptl:value>
+            <ptl:value>192.168.119.0 255.255.255.0 192.168.119.2 2</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
     </ptl:plugin>
 
     <ptl:plugin ptl:name="node4" ptl:plugin-identifier="SimulatedNode">
@@ -103,6 +150,48 @@
           <ptl:connected-to-link ptl:name="lk-node3" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+            <ptl:value>192.168.117.0 255.255.0.0 192.168.117.1 0</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
+    </ptl:plugin>
+  </ptl:nodes>
+
+  <ptl:plugin ptl:name="node5" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node5-interface0-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node5-interface0-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node4" ptl:running="true"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+            <ptl:value>192.168.121.0 255.255.0.0 192.168.121.1 0</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
+    </ptl:plugin>
+  </ptl:nodes>
+
+  <ptl:plugin ptl:name="node6" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node6-interface0-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node6-interface0-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node5" ptl:running="true"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+            <ptl:value>192.168.119.0 255.255.0.0 192.168.119.1 0</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
     </ptl:plugin>
   </ptl:nodes>
 
@@ -131,6 +220,14 @@
     <ptl:ipv4 ptl:name="node1-interface1-ip">
       <ptl:item>192.168.113.1</ptl:item>
       <ptl:item>192.168.114.1</ptl:item>
+    </ptl:ipv4>
+    <ptl:mac ptl:name="node1-interface2-mac">
+      <ptl:item>00:24:8C:01:88:01</ptl:item>
+      <ptl:item>00:24:8C:01:88:04</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node1-interface2-ip">
+      <ptl:item>192.168.121.1</ptl:item>
+      <ptl:item>192.168.122.1</ptl:item>
     </ptl:ipv4>
 
     <ptl:mac ptl:name="node2-interface0-mac">
@@ -166,6 +263,14 @@
       <ptl:item>192.168.117.1</ptl:item>
       <ptl:item>192.168.118.1</ptl:item>
     </ptl:ipv4>
+    <ptl:mac ptl:name="node3-interface2-mac">
+      <ptl:item>00:24:8C:01:87:01</ptl:item>
+      <ptl:item>00:24:8C:01:87:04</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node3-interface2-ip">
+      <ptl:item>192.168.119.1</ptl:item>
+      <ptl:item>192.168.120.1</ptl:item>
+    </ptl:ipv4>
 
     <ptl:mac ptl:name="node4-interface0-mac">
       <ptl:item>00:24:8C:01:86:01</ptl:item>
@@ -175,6 +280,24 @@
       <ptl:item>192.168.117.2</ptl:item>
       <ptl:item>192.168.118.2</ptl:item>
     </ptl:ipv4>
+
+    <ptl:mac ptl:name="node5-interface0-mac">
+      <ptl:item>00:24:8C:01:89:01</ptl:item>
+      <ptl:item>00:24:8C:01:89:04</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node5-interface0-ip">
+      <ptl:item>192.168.121.2</ptl:item>
+      <ptl:item>192.168.122.2</ptl:item>
+    </ptl:ipv4>
+
+    <ptl:mac ptl:name="node6-interface0-mac">
+      <ptl:item>00:24:8C:01:90:01</ptl:item>
+      <ptl:item>00:24:8C:01:90:04</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node6-interface0-ip">
+      <ptl:item>192.168.119.2</ptl:item>
+      <ptl:item>192.168.120.2</ptl:item>
+    </ptl:ipv4>    
 
 <!--
     <ptl:mac ptl:name="city-mac">
