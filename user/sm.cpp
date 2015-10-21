@@ -576,12 +576,12 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
   if(ntohs(ether->ether_type) == ETHERTYPE_MPLS){
 		struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
 
-    int s = (label->entry & MPLS_LS_S_MASK) >> MPLS_LS_S_SHIFT;
+    /*int s = (label->entry & MPLS_LS_S_MASK) >> MPLS_LS_S_SHIFT;
     //label is the VPN-label
     if(s == 1){
 
       return;
-    }
+    }*/
 
     int ingress_label = (label->entry & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
     struct label_routing_node *target_router = getLabelNode(ingress_label);
@@ -660,6 +660,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
     //****** Forward *****//
     else{
+
       struct vrfi *vrfi_dest = getVRFi_inVRF(ntohl(iphdr->ip_dst.s_addr), vrf_table[interface_vpn[ifaceIndex]]);
       struct tunnel_node *tunnel_dest = getTunnelNode(vrfi_dest->egress_ip);
 

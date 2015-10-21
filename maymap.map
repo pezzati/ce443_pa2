@@ -20,7 +20,13 @@
       <ptl:parameters>
 	      	<ptl:param ptl:name="custom-information">
 	          <ptl:value>Default Table</ptl:value>
-            <ptl:value>192.168.111.0 255.255.0.0 192.168.111.1 0</ptl:value>
+            <!--<ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>-->
+            <ptl:value>
+              IP:<ptl:ip-address-ref>node0-interface0-ip</ptl:ip-address-ref> 
+              MASK:255.255.0.0     
+              Next-Hop:<ptl:ip-address-ref>node1-interface0-ip</ptl:ip-address-ref> 
+              Next-Hop-Interface:0
+            </ptl:value>
 
             <ptl:value>Interface-VPN Table</ptl:value>
             <ptl:value>Interface    VPN-Name</ptl:value>
@@ -53,13 +59,54 @@
       <ptl:parameters>
           <ptl:param ptl:name="custom-information">
             <ptl:value>Default Table</ptl:value>
-            <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
-            <ptl:value>192.168.111.0 255.255.255.252 192.168.111.2 0</ptl:value>
-            <ptl:value>192.168.121.0 255.255.255.252 192.168.121.2 2</ptl:value>
-            <ptl:value>192.168.113.0 255.255.255.0   192.168.113.2 1</ptl:value>
-            <ptl:value>192.168.115.0 255.255.255.0   192.168.113.2 1</ptl:value>
-            <ptl:value>192.168.117.0 255.255.255.0   192.168.113.2 1</ptl:value>
-            <ptl:value>192.168.119.0 255.255.255.0   192.168.113.2 1</ptl:value>
+            <!-- <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value> -->
+            <ptl:value>
+              IP:<ptl:ip-address-ref>node0-interface0-ip</ptl:ip-address-ref> 
+              MASK:255.255.255.252     
+              Next-Hop:<ptl:ip-address-ref>node0-interface0-ip</ptl:ip-address-ref> 
+              Next-Hop-Interface:0
+            </ptl:value>
+            <!-- <ptl:value>192.168.111.0 255.255.255.252 192.168.111.2 0</ptl:value> -->
+            
+            <ptl:value>
+              IP:<ptl:ip-address-ref>node5-interface0-ip</ptl:ip-address-ref> 
+              MASK:255.255.255.0     
+              Next-Hop:<ptl:ip-address-ref>node2-interface0-ip</ptl:ip-address-ref> 
+              Next-Hop-Interface:2
+            </ptl:value>
+            <!-- <ptl:value>192.168.121.0 255.255.255.252 192.168.121.2 2</ptl:value> -->
+
+            <ptl:value>
+              IP:<ptl:ip-address-ref>node2-interface0-ip</ptl:ip-address-ref> 
+              MASK:255.255.255.0     
+              Next-Hop:<ptl:ip-address-ref>node2-interface0-ip</ptl:ip-address-ref> 
+              Next-Hop-Interface:1
+            </ptl:value>
+            <!-- <ptl:value>192.168.113.0 255.255.255.0   192.168.113.2 1</ptl:value> -->
+
+            <ptl:value>
+              IP:<ptl:ip-address-ref>node2-interface1-ip</ptl:ip-address-ref> 
+              MASK:255.255.255.0     
+              Next-Hop:<ptl:ip-address-ref>node2-interface0-ip</ptl:ip-address-ref> 
+              Next-Hop-Interface:1
+            </ptl:value>
+            <!-- <ptl:value>192.168.115.0 255.255.255.0   192.168.113.2 1</ptl:value> -->
+
+            <ptl:value>
+              IP:<ptl:ip-address-ref>node3-interface2-ip</ptl:ip-address-ref> 
+              MASK:255.255.255.252     
+              Next-Hop:<ptl:ip-address-ref>node2-interface0-ip</ptl:ip-address-ref> 
+              Next-Hop-Interface:1
+            </ptl:value>
+            <!-- <ptl:value>192.168.117.0 255.255.255.0   192.168.113.2 1</ptl:value> -->
+
+            <ptl:value>
+              IP:<ptl:ip-address-ref>node3-interface1-ip</ptl:ip-address-ref> 
+              MASK:255.255.255.252     
+              Next-Hop:<ptl:ip-address-ref>node2-interface0-ip</ptl:ip-address-ref> 
+              Next-Hop-Interface:1
+            </ptl:value>
+            <!-- <ptl:value>192.168.119.0 255.255.255.0   192.168.113.2 1</ptl:value> -->
             
             <ptl:value>Interface-VPN Table</ptl:value>
             <ptl:value>Interface    VPN-Name</ptl:value>
@@ -74,8 +121,16 @@
             <ptl:value>192.168.119.0 255.255.255.252 21             192.168.113.2 </ptl:value>
             <ptl:value>vpn-B</ptl:value>
             <ptl:value>IP            MASK            VPN-Label      Out-IP</ptl:value>
-            <ptl:value>192.168.121.0 255.255.255.252 30             192.168.121.2 </ptl:value>
-            <ptl:value>192.168.117.0 255.255.255.252 21             192.168.113.2 </ptl:value>
+            <ptl:value>192.168.121.0 255.255.255.252 30            192.168.121.2 </ptl:value>
+            <ptl:value>192.168.117.0 255.255.255.252 31             192.168.113.2 </ptl:value>
+
+            <ptl:value>Tunnel Table</ptl:value>
+            <ptl:value>IP              LSP     Tunnel-Label</ptl:value>
+            <ptl:value>192.168.113.2   4       40</ptl:value>
+
+            <ptl:value>Tunnel Table</ptl:value>
+            <ptl:value>ingress-Label  outgress-Label  next-MAC  outgress-Interface</ptl:value>
+            <ptl:value>55             POP             --        --</ptl:value>
           </ptl:param>
       </ptl:parameters>
     </ptl:plugin>
@@ -129,6 +184,10 @@
             <ptl:value>0            --</ptl:value>
             <ptl:value>1            --</ptl:value>
 
+            <ptl:value>Tunnel Table</ptl:value>
+            <ptl:value>ingress-Label  outgress-Label  next-MAC           outgress-Interface</ptl:value>
+            <ptl:value>40             45              00:24:8C:01:84:01  1</ptl:value>
+            <ptl:value>50             55              00:24:8C:01:81:01  0</ptl:value>
           </ptl:param>
       </ptl:parameters>
     </ptl:plugin>
@@ -179,7 +238,16 @@
             <ptl:value>vpn-B</ptl:value>
             <ptl:value>IP            MASK            VPN-Label      Out-IP</ptl:value>
             <ptl:value>192.168.121.0 255.255.255.252 30             192.168.115.1 </ptl:value>
-            <ptl:value>192.168.117.0 255.255.255.252 21             192.168.117.2 </ptl:value>
+            <ptl:value>192.168.117.0 255.255.255.252 31             192.168.117.2 </ptl:value>
+
+
+            <ptl:value>Tunnel Table</ptl:value>
+            <ptl:value>IP              LSP     Tunnel-Label</ptl:value>
+            <ptl:value>192.168.115.1   4       50</ptl:value>
+
+            <ptl:value>Tunnel Table</ptl:value>
+            <ptl:value>ingress-Label  outgress-Label  next-MAC           outgress-Interface</ptl:value>
+            <ptl:value>45             POP             --                 --</ptl:value>
           </ptl:param>
       </ptl:parameters>
     </ptl:plugin>
