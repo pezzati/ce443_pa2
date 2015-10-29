@@ -81,26 +81,26 @@
 struct ip
   {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-    unsigned int ip_hl:4;		/* header length */
-    unsigned int ip_v:4;		/* version */
+    unsigned int ip_hl:4;       /* header length */
+    unsigned int ip_v:4;        /* version */
 #elif __BYTE_ORDER == __BIG_ENDIAN
-    unsigned int ip_v:4;		/* version */
-    unsigned int ip_hl:4;		/* header length */
+    unsigned int ip_v:4;        /* version */
+    unsigned int ip_hl:4;       /* header length */
 #else
 #error "Byte ordering not specified "
 #endif
-    uint8_t ip_tos;			/* type of service */
-    uint16_t ip_len;			/* total length */
-    uint16_t ip_id;			/* identification */
-    uint16_t ip_off;			/* fragment offset field */
-#define	IP_RF 0x8000			/* reserved fragment flag */
-#define	IP_DF 0x4000			/* dont fragment flag */
-#define	IP_MF 0x2000			/* more fragments flag */
-#define	IP_OFFMASK 0x1fff		/* mask for fragmenting bits */
-    uint8_t ip_ttl;			/* time to live */
-    uint8_t ip_p;			/* protocol */
-    uint16_t ip_sum;			/* checksum */
-    struct in_addr ip_src, ip_dst;	/* source and dest address */
+    uint8_t ip_tos;         /* type of service */
+    uint16_t ip_len;            /* total length */
+    uint16_t ip_id;         /* identification */
+    uint16_t ip_off;            /* fragment offset field */
+#define IP_RF 0x8000            /* reserved fragment flag */
+#define IP_DF 0x4000            /* dont fragment flag */
+#define IP_MF 0x2000            /* more fragments flag */
+#define IP_OFFMASK 0x1fff       /* mask for fragmenting bits */
+    uint8_t ip_ttl;         /* time to live */
+    uint8_t ip_p;           /* protocol */
+    uint16_t ip_sum;            /* checksum */
+    struct in_addr ip_src, ip_dst;  /* source and dest address */
   } __attribute__ ((packed)) ;
 
 /*
@@ -127,7 +127,7 @@ struct sr_ethernet_hdr
 #endif
 
 #ifndef IPPORTO_ICMP
-#define	IPPORTO_ICMP			0x0001	/* ICMP protocol */
+#define IPPORTO_ICMP            0x0001  /* ICMP protocol */
 
 
 #ifndef ETHERTYPE_IP
@@ -135,36 +135,40 @@ struct sr_ethernet_hdr
 #endif
 
 #ifndef ETHERTYPE_ARP
-#define ETHERTYPE_ARP			0x0806 /* ARP protocl */
+#define ETHERTYPE_ARP           0x0806 /* ARP protocl */
+#endif
 
+#ifndef ETHERTYPE_MPLS
+#define ETHERTYPE_MPLS          0x08847 /* ARP protocl */
+#endif
 
 struct sr_tcp
 {
-	uint16_t port_src; /* source port */
-	uint16_t port_dst; /* destination port */
-	uint32_t tcp_seq; /* sequence number */
-	uint32_t tcp_ack; /* acknowledgement number */
-	#define TCP_FIN 0x1 /* FIN flag */
-	#define TCP_SYN 0x2 /* SYN flag */
-	#define TCP_RST 0x4 /* RST flag */
-	#define TCP_PSH 0x8 /* PSH flag */
-	#define TCP_ACK 0x10 /* ACK flag */
-	#define TCP_URG 0x20 /* URG flag */
-	#if __BYTE_ORDER == __LITTLE_ENDIAN
-		unsigned int tcp_ecn_1:1; /* ecn, the first bit */
-		unsigned int tcp_reserved:3; /* reserved */
-		unsigned int tcp_doff:4; /* data offset */
-		unsigned int tcp_flags:6; /* flags */
-		unsigned int tcp_ecn_2:2; /* ecn, the last 2 bits */
-	#elif __BYTE_ORDER == __BIG_ENDIAN
-		unsigned int tcp_doff:4; /* data offset */
-		unsigned int tcp_reserved:3; /* reserved */
-		unsigned int tcp_ecn_1:1; /* ecn, the first bit */
-		unsigned int tcp_ecn_2:2; /* ecn, the last 2 bits */
-		unsigned int tcp_flags:6; /* flags */
-	#else
-		#error "Byte ordering not specified "
-	#endif
+    uint16_t port_src; /* source port */
+    uint16_t port_dst; /* destination port */
+    uint32_t tcp_seq; /* sequence number */
+    uint32_t tcp_ack; /* acknowledgement number */
+    #define TCP_FIN 0x1 /* FIN flag */
+    #define TCP_SYN 0x2 /* SYN flag */
+    #define TCP_RST 0x4 /* RST flag */
+    #define TCP_PSH 0x8 /* PSH flag */
+    #define TCP_ACK 0x10 /* ACK flag */
+    #define TCP_URG 0x20 /* URG flag */
+    #if __BYTE_ORDER == __LITTLE_ENDIAN
+        unsigned int tcp_ecn_1:1; /* ecn, the first bit */
+        unsigned int tcp_reserved:3; /* reserved */
+        unsigned int tcp_doff:4; /* data offset */
+        unsigned int tcp_flags:6; /* flags */
+        unsigned int tcp_ecn_2:2; /* ecn, the last 2 bits */
+    #elif __BYTE_ORDER == __BIG_ENDIAN
+        unsigned int tcp_doff:4; /* data offset */
+        unsigned int tcp_reserved:3; /* reserved */
+        unsigned int tcp_ecn_1:1; /* ecn, the first bit */
+        unsigned int tcp_ecn_2:2; /* ecn, the last 2 bits */
+        unsigned int tcp_flags:6; /* flags */
+    #else
+        #error "Byte ordering not specified "
+    #endif
     uint16_t tcp_window; /* window size */
     uint16_t tcp_sum; /* checksum */
     uint16_t tcp_ptr; /* urgent pointer */
@@ -231,15 +235,19 @@ struct mpls_label {
 
 #ifndef HTYPE_Ether
 #define HTYPE_Ether           0x0001 /* Ethernet HTYPE*/
+#endif
 
 #ifndef PTYPE_IPv4
 #define PTYPE_IPv4            0x0800 /* IPv4 PTYPE */
+#endif
 
 #ifndef HLEN_Ether 
 #define HLEN_Ether            0x06 /* ARP protocl */
+#endif
 
 #ifndef PLEN_IPv4
 #define PLEN_IPv4             0x04 /* ARP protocl */
+#endif
 
 // The ARP packet structure.
 struct arp{

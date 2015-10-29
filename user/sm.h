@@ -26,6 +26,12 @@
 #define _S_M_H_
 
 #include "machine.h"
+#include <cstdlib>
+#include <iostream>
+#include <string.h>
+#include <stdio.h>
+
+using namespace std;
 
 class SimulatedMachine : public Machine {
 public:
@@ -37,6 +43,14 @@ public:
 	virtual void processFrame (Frame frame, int ifaceIndex);
 	
 	static void parseArguments (int argc, char *argv[]);
+
+	void sendARPReq( int ifaceIndex, uint32_t egress_ip);
+	Frame* createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac, int ifaceIndex, int vpn_label, int tunnel_label, string msg);
+	void handleVPNlabel(uint8_t *data, int length , int ifaceIndex);
+	void forwardMPLSPacket(uint8_t *data, int length, struct label_routing_node *target_router);
+	void sendMPLSPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string msg, int vpn_label, int tunnel_label);
+	void sendPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string msg);
+	void sendARPRes(uint8_t *data, int ifaceIndex);
 };
 
 #endif /* sm.h */
