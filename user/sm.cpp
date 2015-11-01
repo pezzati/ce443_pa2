@@ -22,6 +22,7 @@
  *  
  */
 
+
 #include "sm.h"
 
 #include "interface.h"
@@ -29,7 +30,6 @@
 #include "sr_protocol.h"
 
 #include <netinet/in.h>
-/*#include <netinet/ip.h> // for iphdr struct*/
 #include <vector>
 #include <map>
 #include <cstdlib>
@@ -69,13 +69,6 @@ struct default_node
 
 struct msg_stored
 {
-  //struct default_node *node;
-  /*uint32_t egress_ip;
-  int ifaceIndex;
-  uint32_t destIp;
-  string msg;
-  int vpn_label;
-  int tunnel_label;*/
   uint8_t *data;
   int length;
 };

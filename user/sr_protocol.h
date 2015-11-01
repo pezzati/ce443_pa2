@@ -25,10 +25,6 @@
  *
  */
 
-/**
- * sr_protocol.h
- *
- */
 
 #ifndef SR_PROTOCOL_H
 #define SR_PROTOCOL_H
