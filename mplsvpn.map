@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ptl:map xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ptl="http://partov.ce.sharif.edu/2013/PTL/Map" xsi:schemaLocation="http://partov.ce.sharif.edu/2013/PTL/Map http://partov.ce.sharif.edu/2013/PTL/Map.xsd" ptl:name="mplsvpn" ptl:version="3.4" ptl:count="50">
+
+  <ptl:links>
+    <ptl:link ptl:name="lk-r0-r1" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r0-r4" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r0-r3" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r0-r12" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r1-r2" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r1-r5" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r1-r13" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r2-r3" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r2-r6" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r2-r14" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r3-r7" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r3-r15" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r4-r5" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r4-r7" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r4-r8" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r5-r6" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r5-r9" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r6-r7" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r6-r10" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r7-r11" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r8-r9" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r8-r11" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r8-r12" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r9-r10" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r9-r13" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r10-r11" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r10-r14" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r11-r15" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r12-r13" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r12-r15" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r13-r14" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r14-r15" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r0-p0" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r1-p1" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r2-p2" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r3-p3" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r4-p4" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r5-p5" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r6-p6" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r7-p7" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r8-p8" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r9-p9" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r10-p10" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r11-p11" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r12-p12" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r13-p13" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r14-p14" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+    <ptl:link ptl:name="lk-r15-p15" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+  </ptl:links>
+  <ptl:nodes>
+    <ptl:plugin ptl:name="r0" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:01</ptl:mac-address>
+          <ptl:ip-address>192.168.0.65</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r1"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:02</ptl:mac-address>
+          <ptl:ip-address>192.168.0.21</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r4"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:03</ptl:mac-address>
+          <ptl:ip-address>192.168.0.2</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r3"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:04</ptl:mac-address>
+          <ptl:ip-address>192.168.0.6</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r12"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:05</ptl:mac-address>
+          <ptl:ip-address>192.168.0.10</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-p0"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r1" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:06</ptl:mac-address>
+          <ptl:ip-address>192.168.0.129</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-r2"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:07</ptl:mac-address>
+          <ptl:ip-address>192.168.0.85</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-r5"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:08</ptl:mac-address>
+          <ptl:ip-address>192.168.0.66</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r1"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:09</ptl:mac-address>
+          <ptl:ip-address>192.168.0.70</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-r13"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:0A</ptl:mac-address>
+          <ptl:ip-address>192.168.0.74</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-p1"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r2" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:0B</ptl:mac-address>
+          <ptl:ip-address>192.168.0.193</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-r3"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:0C</ptl:mac-address>
+          <ptl:ip-address>192.168.0.149</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-r6"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:0D</ptl:mac-address>
+          <ptl:ip-address>192.168.0.130</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-r2"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:0E</ptl:mac-address>
+          <ptl:ip-address>192.168.0.134</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-r14"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:0F</ptl:mac-address>
+          <ptl:ip-address>192.168.0.138</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-p2"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r3" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:10</ptl:mac-address>
+          <ptl:ip-address>192.168.0.1</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r3"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:11</ptl:mac-address>
+          <ptl:ip-address>192.168.0.213</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r3-r7"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:12</ptl:mac-address>
+          <ptl:ip-address>192.168.0.194</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-r3"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:13</ptl:mac-address>
+          <ptl:ip-address>192.168.0.198</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r3-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:14</ptl:mac-address>
+          <ptl:ip-address>192.168.0.202</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r3-p3"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r4" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:15</ptl:mac-address>
+          <ptl:ip-address>192.168.0.81</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-r5"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:16</ptl:mac-address>
+          <ptl:ip-address>192.168.0.37</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-r8"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:17</ptl:mac-address>
+          <ptl:ip-address>192.168.0.18</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-r7"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:18</ptl:mac-address>
+          <ptl:ip-address>192.168.0.22</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r4"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:19</ptl:mac-address>
+          <ptl:ip-address>192.168.0.26</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-p4"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r5" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:1A</ptl:mac-address>
+          <ptl:ip-address>192.168.0.145</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r5-r6"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:1B</ptl:mac-address>
+          <ptl:ip-address>192.168.0.101</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r5-r9"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:1C</ptl:mac-address>
+          <ptl:ip-address>192.168.0.82</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-r5"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:1D</ptl:mac-address>
+          <ptl:ip-address>192.168.0.86</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-r5"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:1E</ptl:mac-address>
+          <ptl:ip-address>192.168.0.90</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r5-p5"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r6" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:1F</ptl:mac-address>
+          <ptl:ip-address>192.168.0.209</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r6-r7"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:20</ptl:mac-address>
+          <ptl:ip-address>192.168.0.165</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r6-r10"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:21</ptl:mac-address>
+          <ptl:ip-address>192.168.0.146</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r5-r6"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:22</ptl:mac-address>
+          <ptl:ip-address>192.168.0.150</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-r6"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:23</ptl:mac-address>
+          <ptl:ip-address>192.168.0.154</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r6-p6"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r7" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:24</ptl:mac-address>
+          <ptl:ip-address>192.168.0.17</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-r7"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:25</ptl:mac-address>
+          <ptl:ip-address>192.168.0.229</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r7-r11"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:26</ptl:mac-address>
+          <ptl:ip-address>192.168.0.210</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r6-r7"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:27</ptl:mac-address>
+          <ptl:ip-address>192.168.0.214</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r3-r7"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:28</ptl:mac-address>
+          <ptl:ip-address>192.168.0.218</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r7-p7"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r8" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:29</ptl:mac-address>
+          <ptl:ip-address>192.168.0.97</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-r9"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:2A</ptl:mac-address>
+          <ptl:ip-address>192.168.0.53</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-r12"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:2B</ptl:mac-address>
+          <ptl:ip-address>192.168.0.34</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-r11"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:2C</ptl:mac-address>
+          <ptl:ip-address>192.168.0.38</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-r8"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:2D</ptl:mac-address>
+          <ptl:ip-address>192.168.0.42</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-p8"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r9" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:2E</ptl:mac-address>
+          <ptl:ip-address>192.168.0.161</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r9-r10"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:2F</ptl:mac-address>
+          <ptl:ip-address>192.168.0.117</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r9-r13"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:30</ptl:mac-address>
+          <ptl:ip-address>192.168.0.98</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-r9"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:31</ptl:mac-address>
+          <ptl:ip-address>192.168.0.102</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r5-r9"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:32</ptl:mac-address>
+          <ptl:ip-address>192.168.0.106</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r9-p9"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r10" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:33</ptl:mac-address>
+          <ptl:ip-address>192.168.0.225</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r10-r11"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:34</ptl:mac-address>
+          <ptl:ip-address>192.168.0.181</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r10-r14"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:35</ptl:mac-address>
+          <ptl:ip-address>192.168.0.162</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r9-r10"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:36</ptl:mac-address>
+          <ptl:ip-address>192.168.0.166</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r6-r10"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:37</ptl:mac-address>
+          <ptl:ip-address>192.168.0.170</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r10-p10"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r11" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:38</ptl:mac-address>
+          <ptl:ip-address>192.168.0.33</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-r11"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:39</ptl:mac-address>
+          <ptl:ip-address>192.168.0.245</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r11-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:3A</ptl:mac-address>
+          <ptl:ip-address>192.168.0.226</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r10-r11"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:3B</ptl:mac-address>
+          <ptl:ip-address>192.168.0.230</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r7-r11"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:3C</ptl:mac-address>
+          <ptl:ip-address>192.168.0.234</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r11-p11"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r12" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:3D</ptl:mac-address>
+          <ptl:ip-address>192.168.0.113</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r12-r13"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:3E</ptl:mac-address>
+          <ptl:ip-address>192.168.0.5</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-r12"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:3F</ptl:mac-address>
+          <ptl:ip-address>192.168.0.50</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r12-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:40</ptl:mac-address>
+          <ptl:ip-address>192.168.0.54</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-r12"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:41</ptl:mac-address>
+          <ptl:ip-address>192.168.0.58</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r12-p12"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r13" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:42</ptl:mac-address>
+          <ptl:ip-address>192.168.0.177</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r13-r14"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:43</ptl:mac-address>
+          <ptl:ip-address>192.168.0.69</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-r13"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:44</ptl:mac-address>
+          <ptl:ip-address>192.168.0.114</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r12-r13"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:45</ptl:mac-address>
+          <ptl:ip-address>192.168.0.118</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r9-r13"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:46</ptl:mac-address>
+          <ptl:ip-address>192.168.0.122</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r13-p13"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r14" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:47</ptl:mac-address>
+          <ptl:ip-address>192.168.0.241</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r14-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:48</ptl:mac-address>
+          <ptl:ip-address>192.168.0.133</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-r14"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:49</ptl:mac-address>
+          <ptl:ip-address>192.168.0.178</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r13-r14"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:4A</ptl:mac-address>
+          <ptl:ip-address>192.168.0.182</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r10-r14"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:4B</ptl:mac-address>
+          <ptl:ip-address>192.168.0.186</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r14-p14"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+   </ptl:plugin>
+    <ptl:plugin ptl:name="r15" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:4C</ptl:mac-address>
+          <ptl:ip-address>192.168.0.49</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r12-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:4D</ptl:mac-address>
+          <ptl:ip-address>192.168.0.197</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r3-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:4E</ptl:mac-address>
+          <ptl:ip-address>192.168.0.242</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r14-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:4F</ptl:mac-address>
+          <ptl:ip-address>192.168.0.246</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r11-r15"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:50</ptl:mac-address>
+          <ptl:ip-address>192.168.0.250</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r15-p15"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p0" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:51</ptl:mac-address>
+          <ptl:ip-address>192.168.0.9</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r0-p0"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p1" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:52</ptl:mac-address>
+          <ptl:ip-address>192.168.0.73</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r1-p1"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p2" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:53</ptl:mac-address>
+          <ptl:ip-address>192.168.0.137</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r2-p2"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p3" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:54</ptl:mac-address>
+          <ptl:ip-address>192.168.0.201</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r3-p3"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p4" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:55</ptl:mac-address>
+          <ptl:ip-address>192.168.0.25</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r4-p4"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p5" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:56</ptl:mac-address>
+          <ptl:ip-address>192.168.0.89</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r5-p5"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p6" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:57</ptl:mac-address>
+          <ptl:ip-address>192.168.0.153</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r6-p6"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p7" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:58</ptl:mac-address>
+          <ptl:ip-address>192.168.0.217</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r7-p7"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p8" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:59</ptl:mac-address>
+          <ptl:ip-address>192.168.0.41</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r8-p8"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p9" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:5A</ptl:mac-address>
+          <ptl:ip-address>192.168.0.105</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r9-p9"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p10" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:5B</ptl:mac-address>
+          <ptl:ip-address>192.168.0.169</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r10-p10"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p11" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:5C</ptl:mac-address>
+          <ptl:ip-address>192.168.0.233</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r11-p11"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p12" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:5D</ptl:mac-address>
+          <ptl:ip-address>192.168.0.57</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r12-p12"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p13" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:5E</ptl:mac-address>
+          <ptl:ip-address>192.168.0.121</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r13-p13"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p14" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:5F</ptl:mac-address>
+          <ptl:ip-address>192.168.0.185</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r14-p14"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+    <ptl:plugin ptl:name="p15" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address>00:24:8C:09:00:60</ptl:mac-address>
+          <ptl:ip-address>192.168.0.249</ptl:ip-address><ptl:netmask>255.255.255.252</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-r15-p15"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+    </ptl:plugin>
+  </ptl:nodes>
+</ptl:map>
