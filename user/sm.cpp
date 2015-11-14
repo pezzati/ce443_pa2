@@ -22,7 +22,6 @@
  *  
  */
 
-
 #include "sm.h"
 
 #include "interface.h"
@@ -30,12 +29,15 @@
 #include "sr_protocol.h"
 
 #include <netinet/in.h>
+#include <arpa/inet.h>
+/*#include <netinet/ip.h> // for iphdr struct*/
 #include <vector>
 #include <map>
 #include <cstdlib>
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
+#include <sstream>
 
 using namespace std;
 
@@ -49,11 +51,12 @@ struct vrfi
   uint32_t mask;
   int vpn_label;
   uint32_t egress_ip;
+  int ifaceIndex;
 };
 
 struct vrf
 {
-  int vrf_index;
+  string vpn_name;
   vector<struct vrfi*> vrfi_array;
 };
 
@@ -69,6 +72,13 @@ struct default_node
 
 struct msg_stored
 {
+  //struct default_node *node;
+  /*uint32_t egress_ip;
+  int ifaceIndex;
+  uint32_t destIp;
+  string msg;
+  int vpn_label;
+  int tunnel_label;*/
   uint8_t *data;
   int length;
 };
@@ -78,6 +88,7 @@ struct tunnel_node
   uint32_t ip;
   int lsp;
   int tunnel_label;
+  int egress_interface;
 };
 
 
@@ -86,6 +97,7 @@ struct label_routing_node
   int ingress_label;
   int egress_label;
   uint8_t nextMAC[6];
+  bool vpn;
   int egress_interface;
 };
 //*************************************************End of structs
@@ -108,7 +120,16 @@ uint8_t broadcastMAC[6];
 
 
 //********************************************************************************************Functions
-uint32_t StrToIntIp(string str_ip){
+uint32_t ip_string_binary(string s){
+  char *str_ip = new char[15];
+  for(int i = 0; i < 15; i++)
+    str_ip[i] = s[i];
+  uint32_t ip;
+  inet_pton(AF_INET, str_ip, (void*)&ip);
+  return ip;
+}
+
+/*uint32_t StrToIntIp(string str_ip){
   uint32_t ip;
   uint8_t ip_temp[4];
   int size = str_ip.length();
@@ -134,7 +155,7 @@ uint32_t StrToIntIp(string str_ip){
   memcpy(&ip, ip_temp, 4);
   return ip;
 }
-
+*/
 
 struct default_node* getDefault(uint32_t destIp){
   for(int i = 0; i < default_table.size(); i++)
@@ -535,6 +556,176 @@ SimulatedMachine::~SimulatedMachine () {
 void SimulatedMachine::initialize () {
   for (int i = 0; i < 6; ++i)
     broadcastMAC[i] = 0xff;
+  string cs = getCustomInformation();
+  stringstream ss(cs);
+
+  string table_name;
+  ss >> table_name;
+  char first_char_table = table_name[0];
+  bool end = false;
+  while(!end){
+    cout << "Reading tables" << endl;
+    switch(first_char_table){
+      case 'D': /*Default Table*/{
+        cout << "Default Table" << endl; 
+        string input;
+        for(int i = 0; i < 5; i++)
+          ss >> input;
+        while(true){
+          ss >> input;
+          /*cout << input << endl;*/
+          if(input[0] == 'I'){
+            first_char_table = input[0];
+            break;
+          }
+          struct default_node node;
+          node.ip = ip_string_binary(input);
+          ss >> input;
+          node.mask = ip_string_binary(input);
+          ss >> input;
+          node.egress_ip = ip_string_binary(input);
+          int input_int;
+          ss >> input_int;
+          node.ifaceIndex = input_int; 
+          default_table.push_back(&node);
+          cout << "node added" << endl;
+        }
+        cout << "Default table ended" << endl;
+        break;
+      }
+
+      case 'I': /*Interface-vpn*/{
+        cout << "Interface-vpn" << endl;
+        string input;
+        for(int i = 0; i < 3; i++)
+          ss >> input;
+        while(true){
+          ss >> input;
+          /*cout << input << endl;*/
+          if(input[0] == 'V'){
+            first_char_table = input[0];
+            break;
+          }
+          int index = atoi(input.c_str());
+          ss >> input;
+          interface_vpn[index] = input;
+        }
+        cout << "Interface-vpn ended" << endl;
+        break;
+      }
+
+      case 'V': /*Interface-vpn*/{
+        cout << "VRF Tables" << endl;
+        string input;
+        while(true){
+          if(input[0] != 'v')
+            ss >> input;
+          if(input[0] == 'I'){
+            for (int i = 0; i < 4; i++)
+              ss >> input;
+            first_char_table = input[0];
+            break;
+          }
+          struct vrf vrf_temp;
+          vrf_temp.vpn_name = input;
+          for(int i = 0; i < 5; i++)
+            ss >> input;
+          while(true){
+            ss >> input;
+            if(input[0] == 'T' || input[0] == 'v')
+              break;
+            struct vrfi vrfi_temp;
+            cout << input << endl;
+            vrfi_temp.ip = ip_string_binary(input);
+            ss >> input;
+            cout << input << endl;
+            vrfi_temp.mask = ip_string_binary(input);
+            ss >> input;
+            cout << input << endl;
+            vrfi_temp.vpn_label = atoi(input.c_str());
+            ss >> input;
+            cout << input << endl;
+            vrfi_temp.egress_ip = ip_string_binary(input);
+            ss >> input;
+            cout << input << endl;
+            if(input[0] == 'N')
+              vrfi_temp.ifaceIndex = -1;
+            else
+              vrfi_temp.ifaceIndex = atoi(input.c_str());
+            vrf_temp.vrfi_array.push_back(&vrfi_temp);
+            cout << "new node vrfi added to " << vrf_temp.vpn_name << endl;
+          }
+          vrf_table[vrf_temp.vpn_name] = &vrf_temp;
+          cout << "new vpn added : " << vrf_temp.vpn_name << endl;
+          if(input[0] == 'T'){
+            first_char_table = input[0];
+            break;
+          }
+        }
+        break;
+      }
+
+      case 'T': /*Tunnel Table*/{
+        cout << "Tunnel Table" << endl;
+        string input;
+        for(int i = 0; i < 4; i++)
+          ss >> input;
+        while(true){
+          ss >> input;
+          if(input[0] == 'L'){
+            first_char_table = input[0];
+            break;
+          }
+          struct tunnel_node tunnel_node_temp;
+          tunnel_node_temp.ip = ip_string_binary(input);
+          // ss >> input;
+          // cout << input << " ";
+          // tunnel_node_temp.lsp = atoi(input.c_str());
+          ss >> input;
+          tunnel_node_temp.tunnel_label = atoi(input.c_str());
+          ss >> input;
+          tunnel_node_temp.egress_interface = atoi(input.c_str());
+          tunnel_table.push_back(&tunnel_node_temp);
+          cout << "new tunnel routing added" << endl;
+        }
+        cout << "Tunnel Table ended" << endl;
+        break;
+      }
+
+      case 'L': /*LS Table*/{
+        cout << "LS Table" << endl;
+        string input;
+        for(int i = 0; i < 5; i++)
+          ss >> input;
+        while(true){
+          ss >> input;
+          if(input == "N/A")
+            break;
+          struct label_routing_node ls_node;
+          ls_node.ingress_label = atoi(input.c_str());
+          ss >> input;
+          ls_node.egress_label = atoi(input.c_str());
+          ss >> input;
+          ls_node.vpn = false;
+          if(input[0] != 'v')
+            sscanf(input.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(ls_node.nextMAC[0]), &(ls_node.nextMAC[1]), 
+                    &(ls_node.nextMAC[2]), &(ls_node.nextMAC[3]), &(ls_node.nextMAC[4]), &(ls_node.nextMAC[5]));
+          else
+            ls_node.vpn = true;
+          ss >> input;
+          if(input[0] == 'N')
+            ls_node.egress_interface = -1;
+          else
+            ls_node.egress_interface = atoi(input.c_str());
+          label_routing_table.push_back(&ls_node);
+          cout << "new ls node added" << endl;
+        }
+        cout << "LS Table ended" << endl;
+        end = true;
+        break;
+      }
+    }
+  }
   // TODO: Initialize your program here; interfaces are valid now.
 }
 
@@ -712,7 +903,7 @@ void SimulatedMachine::run () {
       string msg;
 
       cin >> str_destIp >> str_vrfIndex >> msg;
-      uint32_t destIp = StrToIntIp(str_destIp);
+      uint32_t destIp = ip_string_binary(str_destIp);
       
       //if vrf index equals to '--' this means target send it non VPN or in its VPN
       if(str_vrfIndex != "--"){
