@@ -35,7 +35,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -88,8 +88,8 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
-              <ptl:value>192.168.115.2 50           1</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>192.168.115.2 50           1                00:24:8C:01:82:01</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -137,8 +137,8 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
-              <ptl:value>192.168.115.2 55           1</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>192.168.115.2 55           1                00:24:8C:01:82:06</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -186,8 +186,8 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
-              <ptl:value>192.168.113.1 55           0</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>192.168.113.1 55           0                00:24:8C:01:83:01</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -245,8 +245,8 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.111.2 2</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
-              <ptl:value>192.168.113.1 60           0</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>192.168.113.1 60           0                00:24:8C:01:83:08</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -310,7 +310,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -341,7 +341,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>

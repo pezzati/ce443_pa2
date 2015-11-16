@@ -79,6 +79,7 @@ struct msg_stored
   string msg;
   int vpn_label;
   int tunnel_label;*/
+  
   uint8_t *data;
   int length;
 };
@@ -120,13 +121,39 @@ uint8_t broadcastMAC[6];
 
 
 //********************************************************************************************Functions
-uint32_t ip_string_binary(string s){
-  char *str_ip = new char[15];
-  for(int i = 0; i < 15; i++)
-    str_ip[i] = s[i];
+uint32_t ip_string_binary(string str_gatewayIP){
+  uint8_t ip_temp[4];
+  int size = str_gatewayIP.length();
+  int begin = 0;
+  int end = 0;
+  for(int i = 0; i < 4; i++){
+    int value = 0;
+    
+    while(end < size && str_gatewayIP[end] != '.')
+      end++;
+    int power = 1;
+    int count = 1;
+    while(begin != end){
+      value = value + power * ((int) (str_gatewayIP[end - count] - '0'));
+      power = power * 10;
+      begin++;
+      count++;
+    }
+    end++;
+    begin++;
+    ip_temp[3 - i] = (uint8_t) value;
+  }
   uint32_t ip;
-  inet_pton(AF_INET, str_ip, (void*)&ip);
+  memcpy(&ip, ip_temp, 4);
   return ip;
+}
+
+string ip_binary_string(uint32_t ip){
+  struct in_addr ip_addr;
+  ip_addr.s_addr = htonl(ip);
+  const char* result = inet_ntoa(ip_addr);
+  string s = result;
+  return s;
 }
 
 /*uint32_t StrToIntIp(string str_ip){
@@ -158,9 +185,14 @@ uint32_t ip_string_binary(string s){
 */
 
 struct default_node* getDefault(uint32_t destIp){
-  for(int i = 0; i < default_table.size(); i++)
-    if((default_table.at(i)->ip & default_table.at(i)->mask) == (default_table.at(i)->mask & destIp))
+  cout << "getDefault" << endl;
+  for(int i = 0; i < default_table.size(); i++){
+    uint32_t ip_table = default_table.at(i)->ip;
+    uint32_t mask = default_table.at(i)->mask;
+    if((ip_table & mask) == (mask & destIp)){
       return default_table.at(i);
+    }
+  }
   return NULL;
 }
 
@@ -225,6 +257,7 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
   ip_header.ip_tos = 0;
   ip_header.ip_id = htons((uint16_t)0);
   ip_header.ip_off = htons((uint16_t)0);
+  iface[ifaceIndex];
   ip_header.ip_src.s_addr = htonl(iface[ifaceIndex].getIp());
   ip_header.ip_dst.s_addr = htonl(destIp);
   ip_header.ip_p = IPPROTO_UDP;
@@ -234,7 +267,6 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
   ip_header.ip_len = htons(sizeof(struct ip) + sizeof(struct sr_udp) + msg.length());
   ip_header.ip_sum = 0x0000; 
   ip_header.ip_sum = checksum((uint16_t *)&ip_header, sizeof(struct ip));
-
 
   //********MPLS
   //VPN label
@@ -275,7 +307,7 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
   struct sr_ethernet_hdr ethernet_hdr;
   memcpy(ethernet_hdr.ether_dhost, destMac, 6);
   memcpy(ethernet_hdr.ether_shost, iface[ifaceIndex].mac, 6);
-  ethernet_hdr.ether_type = htons(ETHERTYPE_ARP);
+  ethernet_hdr.ether_type = htons(ETHERTYPE_UDP);
 
 
   uint8_t *data = new uint8_t[sizeof(struct sr_ethernet_hdr) +  vpn_size + tunnel_size
@@ -298,6 +330,7 @@ void SimulatedMachine::sendARPReq( int ifaceIndex, uint32_t egress_ip){
   //build ARP req
   struct arp arp;
   arp.arp_hard_type = htons(HTYPE_Ether);
+  printf("%x\n", arp.arp_hard_type);
   arp.arp_proto_type = htons(PTYPE_IPv4);
   arp.arp_hard_size = HLEN_Ether;
   arp.arp_proto_size = PLEN_IPv4;
@@ -313,15 +346,15 @@ void SimulatedMachine::sendARPReq( int ifaceIndex, uint32_t egress_ip){
   ethernet_hdr.ether_type = htons(ETHERTYPE_ARP);
 
   //save to memory
-  uint8_t data;
-  memcpy(&data, &ethernet_hdr, sizeof(struct sr_ethernet_hdr));
-  memcpy(&data + sizeof(struct sr_ethernet_hdr), &arp, sizeof(struct arp));
+  uint8_t *data = new uint8_t[sizeof(struct sr_ethernet_hdr) + sizeof(struct arp)];
+  memcpy(data, &ethernet_hdr, sizeof(struct sr_ethernet_hdr));
+  memcpy(data + sizeof(struct sr_ethernet_hdr), &arp, sizeof(struct arp));
 
   //Frame
-  Frame frame( sizeof(struct sr_ethernet_hdr) + sizeof(struct arp), &data);
+  Frame frame( sizeof(struct sr_ethernet_hdr) + sizeof(struct arp), data);
   sendFrame(frame, ifaceIndex);
 
-  cout << "The ARP requset sent out." << endl;
+  cout << "the ARP requset sent for " << ip_binary_string(egress_ip)<< "." << endl;
   return;
 }
 
@@ -345,11 +378,10 @@ void SimulatedMachine::sendARPRes(uint8_t *data, int ifaceIndex){
   Frame frame( sizeof(struct sr_ethernet_hdr) + sizeof(struct arp), data);
   sendFrame(frame, ifaceIndex);
 
-  cout << "The ARP response sent." << endl;
+  cout << "the ARP response sent to " <<  ip_binary_string(ntohl(arp->arp_ip_dest)) << "." << endl;
   return;
 }
-
-
+ 
 void SimulatedMachine::sendPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string msg){
   //build UDP
   //uint8_t *beginUdp = new uint8_t[msg.length() + sizeof(struct sr_udp)];
@@ -564,6 +596,12 @@ void SimulatedMachine::initialize () {
   char first_char_table = table_name[0];
   bool end = false;
   while(!end){
+    /*for (int i = 0; i < default_table.size(); i++){
+      cout << ip_binary_string(default_table.at(i)->ip);
+      cout << " " << ip_binary_string(default_table.at(i)->mask);
+      cout << " " << ip_binary_string(default_table.at(i)->egress_ip);
+      cout << " " << default_table.at(i)->ifaceIndex << endl;
+    }*/
     cout << "Reading tables" << endl;
     switch(first_char_table){
       case 'D': /*Default Table*/{
@@ -572,22 +610,22 @@ void SimulatedMachine::initialize () {
         for(int i = 0; i < 5; i++)
           ss >> input;
         while(true){
+          cout << "in while" << endl;
           ss >> input;
-          /*cout << input << endl;*/
           if(input[0] == 'I'){
             first_char_table = input[0];
             break;
           }
-          struct default_node node;
-          node.ip = ip_string_binary(input);
+          struct default_node *default_temp = new struct default_node;
+          default_temp->ip = ip_string_binary(input);
           ss >> input;
-          node.mask = ip_string_binary(input);
+          default_temp->mask = ip_string_binary(input);
           ss >> input;
-          node.egress_ip = ip_string_binary(input);
+          default_temp->egress_ip = ip_string_binary(input);
           int input_int;
           ss >> input_int;
-          node.ifaceIndex = input_int; 
-          default_table.push_back(&node);
+          default_temp->ifaceIndex = input_int; 
+          default_table.push_back(default_temp);
           cout << "node added" << endl;
         }
         cout << "Default table ended" << endl;
@@ -606,10 +644,12 @@ void SimulatedMachine::initialize () {
             first_char_table = input[0];
             break;
           }
+
           int index = atoi(input.c_str());
           ss >> input;
           interface_vpn[index] = input;
         }
+
         cout << "Interface-vpn ended" << endl;
         break;
       }
@@ -623,40 +663,37 @@ void SimulatedMachine::initialize () {
           if(input[0] == 'I'){
             for (int i = 0; i < 4; i++)
               ss >> input;
+            ss >> input;
             first_char_table = input[0];
             break;
           }
-          struct vrf vrf_temp;
-          vrf_temp.vpn_name = input;
-          for(int i = 0; i < 5; i++)
+          struct vrf *vrf_temp = new struct vrf;
+          vrf_temp->vpn_name = input;
+          for(int i =
+           0; i < 5; i++)
             ss >> input;
           while(true){
             ss >> input;
             if(input[0] == 'T' || input[0] == 'v')
               break;
-            struct vrfi vrfi_temp;
-            cout << input << endl;
-            vrfi_temp.ip = ip_string_binary(input);
+            struct vrfi *vrfi_temp = new struct vrfi;
+            vrfi_temp->ip = ip_string_binary(input);
             ss >> input;
-            cout << input << endl;
-            vrfi_temp.mask = ip_string_binary(input);
+            vrfi_temp->mask = ip_string_binary(input);
             ss >> input;
-            cout << input << endl;
-            vrfi_temp.vpn_label = atoi(input.c_str());
+            vrfi_temp->vpn_label = atoi(input.c_str());
             ss >> input;
-            cout << input << endl;
-            vrfi_temp.egress_ip = ip_string_binary(input);
+            vrfi_temp->egress_ip = ip_string_binary(input);
             ss >> input;
-            cout << input << endl;
             if(input[0] == 'N')
-              vrfi_temp.ifaceIndex = -1;
+              vrfi_temp->ifaceIndex = -1;
             else
-              vrfi_temp.ifaceIndex = atoi(input.c_str());
-            vrf_temp.vrfi_array.push_back(&vrfi_temp);
-            cout << "new node vrfi added to " << vrf_temp.vpn_name << endl;
+              vrfi_temp->ifaceIndex = atoi(input.c_str());
+            vrf_temp->vrfi_array.push_back(vrfi_temp);
+            cout << "new node vrfi added to " << vrf_temp->vpn_name << endl;
           }
-          vrf_table[vrf_temp.vpn_name] = &vrf_temp;
-          cout << "new vpn added : " << vrf_temp.vpn_name << endl;
+          vrf_table[vrf_temp->vpn_name] = vrf_temp;
+          cout << "new vpn added : " << vrf_temp->vpn_name << endl;
           if(input[0] == 'T'){
             first_char_table = input[0];
             break;
@@ -676,16 +713,16 @@ void SimulatedMachine::initialize () {
             first_char_table = input[0];
             break;
           }
-          struct tunnel_node tunnel_node_temp;
-          tunnel_node_temp.ip = ip_string_binary(input);
+          struct tunnel_node *tunnel_node_temp = new struct tunnel_node;
+          tunnel_node_temp->ip = ip_string_binary(input);
           // ss >> input;
           // cout << input << " ";
           // tunnel_node_temp.lsp = atoi(input.c_str());
           ss >> input;
-          tunnel_node_temp.tunnel_label = atoi(input.c_str());
+          tunnel_node_temp->tunnel_label = atoi(input.c_str());
           ss >> input;
-          tunnel_node_temp.egress_interface = atoi(input.c_str());
-          tunnel_table.push_back(&tunnel_node_temp);
+          tunnel_node_temp->egress_interface = atoi(input.c_str());
+          tunnel_table.push_back(tunnel_node_temp);
           cout << "new tunnel routing added" << endl;
         }
         cout << "Tunnel Table ended" << endl;
@@ -695,29 +732,36 @@ void SimulatedMachine::initialize () {
       case 'L': /*LS Table*/{
         cout << "LS Table" << endl;
         string input;
+        string cach_input;
         for(int i = 0; i < 5; i++)
           ss >> input;
+        cach_input = input;
+        // cout << input << endl;
+        // cin >> n;
         while(true){
+          // cout << "in while" << endl;
           ss >> input;
-          if(input == "N/A")
+          // cout << input << endl;
+          if(input == cach_input)
             break;
-          struct label_routing_node ls_node;
-          ls_node.ingress_label = atoi(input.c_str());
+          struct label_routing_node *ls_node = new struct label_routing_node;
+          ls_node->ingress_label = atoi(input.c_str());
           ss >> input;
-          ls_node.egress_label = atoi(input.c_str());
+          ls_node->egress_label = atoi(input.c_str());
           ss >> input;
-          ls_node.vpn = false;
+          ls_node->vpn = false;
           if(input[0] != 'v')
-            sscanf(input.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(ls_node.nextMAC[0]), &(ls_node.nextMAC[1]), 
-                    &(ls_node.nextMAC[2]), &(ls_node.nextMAC[3]), &(ls_node.nextMAC[4]), &(ls_node.nextMAC[5]));
+            sscanf(input.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(ls_node->nextMAC[0]), &(ls_node->nextMAC[1]), 
+                    &(ls_node->nextMAC[2]), &(ls_node->nextMAC[3]), &(ls_node->nextMAC[4]), &(ls_node->nextMAC[5]));
           else
-            ls_node.vpn = true;
+            ls_node->vpn = true;
           ss >> input;
+          cach_input = input;
           if(input[0] == 'N')
-            ls_node.egress_interface = -1;
+            ls_node->egress_interface = -1;
           else
-            ls_node.egress_interface = atoi(input.c_str());
-          label_routing_table.push_back(&ls_node);
+            ls_node->egress_interface = atoi(input.c_str());
+          label_routing_table.push_back(ls_node);
           cout << "new ls node added" << endl;
         }
         cout << "LS Table ended" << endl;
@@ -764,6 +808,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
   //***************************************** MPLS *****************************************// 
   if(ntohs(ether->ether_type) == ETHERTYPE_MPLS){
+    cout << "MPLS" << endl;
     struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
 
     /*int s = (label->entry & MPLS_LS_S_MASK) >> MPLS_LS_S_SHIFT;
@@ -794,6 +839,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
   //***************************************** ARP *****************************************//
   if(ntohs(ether->ether_type) == ETHERTYPE_ARP){
+    cout << "ARP" << endl;
     struct arp *arp = (struct arp*)(data + sizeof(struct sr_ethernet_hdr));
     //An ARP Requset arrived
     if(ntohs(arp->arp_op) == ARP_OP_REQUEST){
@@ -803,8 +849,11 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
     }
     //An ARP Reply arrived
     if(ntohs(arp->arp_op) == ARP_OP_REPLY){
+      cout << "ARP Reply" << endl;
       if(ntohl(arp->arp_ip_dest) == iface[ifaceIndex].getIp()){
+        cout << "for me" << endl;
         if(arp_waiting_que[ntohl(arp->arp_ip_source)] != NULL){
+          cout << "saved msg founded" << endl;
           struct msg_stored *awaken_msg = arp_waiting_que[ntohl(arp->arp_ip_source)];
           uint8_t destMac[6];
           memcpy(destMac, arp->arp_eth_source, 6);
@@ -813,13 +862,21 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
           if(awaken_msg->vpn_label > 0)
             sendMPLSPacket(awaken_msg->destIp, destMac, awaken_msg->ifaceIndex, awaken_msg->msg,
                          awaken_msg->vpn_label, awaken_msg->tunnel_table);*/
+          cout << "here" << endl;
           uint8_t *data_temp = awaken_msg->data;
           struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
+          cout << "here2" << endl;
           memcpy(ether_dest->ether_dhost, destMac, 6);
-          Frame frame(awaken_msg->length, data_temp);
-          sendFrame(frame, ifaceIndex);
-
+          cout << "here3" << endl;
+          Frame frame_temp(awaken_msg->length, data_temp);
+          cout << "here4" << endl;
+          sendFrame(frame_temp, ifaceIndex);
+          cout << "earse th saved msg" << endl;
           arp_waiting_que.erase(ntohl(arp->arp_ip_source));
+          return;
+        }
+        else{
+          cout << "saved masg not founded" << endl;
           return;
         }
       }
@@ -868,7 +925,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
       string *msg = new string[str_len];
       memcpy(msg, data + sizeof(struct sr_udp), str_len);
 
-      struct msg_stored save_msg;
+      struct msg_stored *save_msg = new struct msg_stored;
       /*save_msg.egress_ip = node->egress_ip;
       save_msg.ifaceIndex = node->ifaceIndex;
       save_msg.destIp = destIp;
@@ -876,10 +933,10 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
       save_msg.vpn_label = vrfi_dest->vpn_label;
       save_msg.tunnel_table = tunnel_node->tunnel_label;*/
       Frame *frame = createMPLS_IP_packet(ntohl(iphdr->ip_dst.s_addr), broadcastMAC, node->ifaceIndex, vrfi_dest->vpn_label, tunnel_dest->tunnel_label, *msg);
-      save_msg.data = frame->data;
-      save_msg.length = frame->length;
+      save_msg->data = frame->data;
+      save_msg->length = frame->length;
 
-      arp_waiting_que[node->egress_ip] = &save_msg;
+      arp_waiting_que[node->egress_ip] = save_msg;
 
       sendARPReq(node->ifaceIndex, node->egress_ip);
       return;
@@ -898,6 +955,7 @@ void SimulatedMachine::run () {
   std::string command;
   while (cin >> command) {
     if (command == "send") {
+      cout << "send" << endl;
       string str_destIp;
       string str_vrfIndex;
       string msg;
@@ -918,6 +976,7 @@ void SimulatedMachine::run () {
 
         //Search in default table
         struct default_node *node = getDefault(vrfi_dest->egress_ip);
+
         if(node == NULL){
           cout << "Destination is unreachable" << endl;
           return;
@@ -929,6 +988,7 @@ void SimulatedMachine::run () {
 
         struct msg_stored save_msg;
         Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, node->ifaceIndex, vrfi_dest->vpn_label, tunnel_node->tunnel_label, msg);
+        save_msg.data = new uint8_t[frame->length];
         save_msg.data = frame->data;
         save_msg.length = frame->length;
 
@@ -938,20 +998,27 @@ void SimulatedMachine::run () {
         return;
       }
       else{
+        cout << "send without vrf" << endl;
         //Search in default table
         struct default_node *node = getDefault(destIp);
+        cout << ip_binary_string(node->ip) << endl;
         if(node == NULL){
           cout << "Destination is unreachable" << endl;
           return;
         }
 
-        struct msg_stored save_msg;
+        cout << "create msg" << endl;
+        struct msg_stored *save_msg = new struct msg_stored;
+
+        cout << node->ifaceIndex << endl;
         Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, node->ifaceIndex, -1, -1, msg);
-        save_msg.data = frame->data;
-        save_msg.length = frame->length;
+        save_msg->data = frame->data;
+        save_msg->length = frame->length;
 
-        arp_waiting_que[node->egress_ip] = &save_msg;
+        cout << "save msg" << endl;
+        arp_waiting_que[node->egress_ip] = save_msg;
 
+        cout << "sending arp" << endl;
         sendARPReq(node->ifaceIndex, node->egress_ip);
         return;
       }
