@@ -71,15 +71,7 @@ struct default_node
 
 
 struct msg_stored
-{
-  //struct default_node *node;
-  /*uint32_t egress_ip;
-  int ifaceIndex;
-  uint32_t destIp;
-  string msg;
-  int vpn_label;
-  int tunnel_label;*/
-  
+{  
   uint8_t *data;
   int length;
 };
@@ -90,6 +82,7 @@ struct tunnel_node
   int lsp;
   int tunnel_label;
   int egress_interface;
+  uint8_t nextMAC[6];
 };
 
 
@@ -99,6 +92,7 @@ struct label_routing_node
   int egress_label;
   uint8_t nextMAC[6];
   bool vpn;
+  string vpn_name;
   int egress_interface;
 };
 //*************************************************End of structs
@@ -156,36 +150,8 @@ string ip_binary_string(uint32_t ip){
   return s;
 }
 
-/*uint32_t StrToIntIp(string str_ip){
-  uint32_t ip;
-  uint8_t ip_temp[4];
-  int size = str_ip.length();
-  int begin = 0;
-  int end = 0;
-  for(int i = 0; i < 4; i++){
-    int value = 0;
-    
-    while(end < size && str_ip[end] != '.')
-      end++;
-    int power = 1;
-    int count = 1;
-    while(begin != end){
-      value = value + power * ((int) (str_ip[end - count] - '0'));
-      power = power * 10;
-      begin++;
-      count++;
-    }
-    end++;
-    begin++;
-    ip_temp[3 - i] = (uint8_t) value;
-  }
-  memcpy(&ip, ip_temp, 4);
-  return ip;
-}
-*/
 
 struct default_node* getDefault(uint32_t destIp){
-  cout << "getDefault" << endl;
   for(int i = 0; i < default_table.size(); i++){
     uint32_t ip_table = default_table.at(i)->ip;
     uint32_t mask = default_table.at(i)->mask;
@@ -241,6 +207,25 @@ struct label_routing_node* getLabelNode(int ingress_label){
   return NULL;
 }
 
+struct vrfi* getVRFi_by_label_vrf(int ingress_label, struct vrf *vrf_temp){
+  for(int i = 0; i < vrf_temp->vrfi_array.size(); i++){
+    if(vrf_temp->vrfi_array.at(i)->vpn_label == ingress_label)
+      return vrf_temp->vrfi_array.at(i);
+  }
+  return NULL;
+}
+
+
+int SimulatedMachine::getNeighbor(uint32_t ip){
+  for(int i = 0; i < interface_vpn.size(); i++){
+    if(interface_vpn[i] == "N/A"){
+        if((iface[i].getIp() & iface[i].getMask()) == (ip & iface[i].getMask())){
+        return i;
+      }
+    }
+  }
+  return -1;
+}
 
 Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac, int ifaceIndex, int vpn_label, int tunnel_label, string msg){
   //build UDP
@@ -270,57 +255,70 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
 
   //********MPLS
   //VPN label
-  struct mpls_label mpls_vpn;
+  struct mpls_label *mpls_vpn = new struct mpls_label;
   //Tunnel label
-  struct mpls_label mpls_tunnel;
+  struct mpls_label *mpls_tunnel = new struct mpls_label;
   int vpn_size = 0;
   int tunnel_size = 0;
   if(vpn_label != -1){
     vpn_size = 4;
     //value
-    mpls_vpn.entry = vpn_label;
-    mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
+    mpls_vpn->entry = vpn_label;
+    mpls_vpn->entry = mpls_vpn->entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
     //TC
-    mpls_vpn.entry = mpls_vpn.entry + (uint32_t)0;
-    mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
+    mpls_vpn->entry = mpls_vpn->entry + (uint32_t)0;
+    mpls_vpn->entry = mpls_vpn->entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
     //S
-    mpls_vpn.entry = mpls_vpn.entry + (uint32_t)1;
-    mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
+    mpls_vpn->entry = mpls_vpn->entry + (uint32_t)1;
+    mpls_vpn->entry = mpls_vpn->entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
     //TTL
-    mpls_vpn.entry = mpls_vpn.entry + (uint32_t)0;
-  
+    mpls_vpn->entry = mpls_vpn->entry + (uint32_t)0;
+
+    cout << "the label " << vpn_label << " added to " << ip_binary_string(destIp) << endl;
+
+    mpls_vpn->entry = htonl(mpls_vpn->entry);
+  }
+  if(tunnel_label != -1){
     tunnel_size = 4;
     //value
-    mpls_tunnel.entry = tunnel_label;
-    mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
+    mpls_tunnel->entry = tunnel_label;
+    mpls_tunnel->entry = mpls_tunnel->entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
     //TC
-    mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
-    mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
+    mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)0;
+    mpls_tunnel->entry = mpls_tunnel->entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
     //S
-    mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
-    mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
+    mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)0;
+    if(vpn_label != -1)
+      mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)1;
+    mpls_tunnel->entry = mpls_tunnel->entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
     //TTL
-    mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
+    mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)0;
+
+    cout << "the label " << tunnel_label << " added to " << ip_binary_string(destIp) << endl;
+
+    mpls_tunnel->entry = htonl(mpls_tunnel->entry);
   }
   
   // build ethernet
   struct sr_ethernet_hdr ethernet_hdr;
   memcpy(ethernet_hdr.ether_dhost, destMac, 6);
   memcpy(ethernet_hdr.ether_shost, iface[ifaceIndex].mac, 6);
-  ethernet_hdr.ether_type = htons(ETHERTYPE_UDP);
-
+  if(vpn_label != -1 || tunnel_label != -1)
+    ethernet_hdr.ether_type = htons(ETHERTYPE_MPLS);
+  else
+    ethernet_hdr.ether_type = htons(ETHERTYPE_IP);
 
   uint8_t *data = new uint8_t[sizeof(struct sr_ethernet_hdr) +  vpn_size + tunnel_size
                    + sizeof(struct ip) + sizeof(struct sr_udp) + msg.length()];
   memcpy(data, &ethernet_hdr, sizeof(struct sr_ethernet_hdr));
-  memcpy(data + sizeof(struct sr_ethernet_hdr), &mpls_tunnel, tunnel_size);
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + tunnel_size, &mpls_vpn, vpn_size);
+  memcpy(data + sizeof(struct sr_ethernet_hdr), mpls_tunnel, tunnel_size);
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + tunnel_size, mpls_vpn, vpn_size);
   memcpy(data + sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size , &ip_header, sizeof(struct ip));
   memcpy(data + sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size + sizeof(struct ip), &udp_hdr, sizeof(struct sr_udp));
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size + sizeof(struct ip) + sizeof(struct sr_udp), &msg, msg.length());
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size + sizeof(struct ip) + sizeof(struct sr_udp), msg.c_str(), msg.length());
 
-  Frame frame( sizeof(struct sr_ethernet_hdr) + 4 * 2 + sizeof(struct ip) + sizeof(struct sr_udp) + msg.length(), data);
-  return &frame;
+  Frame *frame = new Frame( sizeof(struct sr_ethernet_hdr) + vpn_size + tunnel_size + sizeof(struct ip) + sizeof(struct sr_udp) + msg.length(), data);
+  return frame;
 }
 
 
@@ -381,125 +379,7 @@ void SimulatedMachine::sendARPRes(uint8_t *data, int ifaceIndex){
   cout << "the ARP response sent to " <<  ip_binary_string(ntohl(arp->arp_ip_dest)) << "." << endl;
   return;
 }
- 
-void SimulatedMachine::sendPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string msg){
-  //build UDP
-  //uint8_t *beginUdp = new uint8_t[msg.length() + sizeof(struct sr_udp)];
-  //struct sr_udp *udp_hdr = (struct sr_udp*)beginUdp;
-  struct sr_udp udp_hdr;
-  udp_hdr.port_src = htons(5000);
-  udp_hdr.port_dst = htons((uint16_t)3000);
-  udp_hdr.length = htons((uint16_t)(sizeof(sr_udp) + msg.length()));
-  udp_hdr.udp_sum = htons((uint16_t)0);
 
-  //IP
-  struct ip ip_header;
-  ip_header.ip_tos = 0;
-  ip_header.ip_id = htons((uint16_t)0);
-  ip_header.ip_off = htons((uint16_t)0);
-  ip_header.ip_src.s_addr = htonl(iface[ifaceIndex].getIp());
-  ip_header.ip_dst.s_addr = htonl(destIp);
-  ip_header.ip_p = IPPROTO_UDP;
-  ip_header.ip_ttl = 64;
-  ip_header.ip_hl = 5;
-  ip_header.ip_v = 4;
-  ip_header.ip_len = htons(sizeof(struct ip) + sizeof(struct sr_udp) + msg.length());
-  ip_header.ip_sum = 0x0000; 
-  ip_header.ip_sum = checksum((uint16_t *)&ip_header, sizeof(struct ip));
-
-  // build ethernet
-  struct sr_ethernet_hdr ethernet_hdr;
-  memcpy(ethernet_hdr.ether_dhost, destMac, 6);
-  memcpy(ethernet_hdr.ether_shost, iface[ifaceIndex].mac, 6);
-  ethernet_hdr.ether_type = htons(ETHERTYPE_IP);
-
-  uint8_t *data = new uint8_t[sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp) + msg.length()];
-  memcpy(data, &ethernet_hdr, sizeof(struct sr_ethernet_hdr));
-  memcpy(data + sizeof(struct sr_ethernet_hdr), &ip_header, sizeof(struct ip));
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip), &udp_hdr, sizeof(struct sr_udp));
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp), &msg, msg.length());
-
-  Frame frame( sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp) + msg.length(), data);
-  sendFrame(frame, ifaceIndex);
-  return;
-}
-
-
-void SimulatedMachine::sendMPLSPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string msg, int vpn_label, int tunnel_label){
-  //build UDP
-  //uint8_t *beginUdp = new uint8_t[msg.length() + sizeof(struct sr_udp)];
-  //struct sr_udp *udp_hdr = (struct sr_udp*)beginUdp;
-  struct sr_udp udp_hdr;
-  udp_hdr.port_src = htons(5000);
-  udp_hdr.port_dst = htons((uint16_t)3000);
-  udp_hdr.length = htons((uint16_t)(sizeof(sr_udp) + msg.length()));
-  udp_hdr.udp_sum = htons((uint16_t)0);
-
-  //IP
-  struct ip ip_header;
-  ip_header.ip_tos = 0;
-  ip_header.ip_id = htons((uint16_t)0);
-  ip_header.ip_off = htons((uint16_t)0);
-  ip_header.ip_src.s_addr = htonl(iface[ifaceIndex].getIp());
-  ip_header.ip_dst.s_addr = htonl(destIp);
-  ip_header.ip_p = IPPROTO_UDP;
-  ip_header.ip_ttl = 64;
-  ip_header.ip_hl = 5;
-  ip_header.ip_v = 4;
-  ip_header.ip_len = htons(sizeof(struct ip) + sizeof(struct sr_udp) + msg.length());
-  ip_header.ip_sum = 0x0000; 
-  ip_header.ip_sum = checksum((uint16_t *)&ip_header, sizeof(struct ip));
-
-  //********MPLS
-  //VPN label
-  struct mpls_label mpls_vpn;
-  //value
-  mpls_vpn.entry = vpn_label;
-  mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
-  //TC
-  mpls_vpn.entry = mpls_vpn.entry + (uint32_t)0;
-  mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
-  //S
-  mpls_vpn.entry = mpls_vpn.entry + (uint32_t)1;
-  mpls_vpn.entry = mpls_vpn.entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
-  //TTL
-  mpls_vpn.entry = mpls_vpn.entry + (uint32_t)0;
-
-  //Tunnel label
-  struct mpls_label mpls_tunnel;
-  //value
-  mpls_tunnel.entry = tunnel_label;
-  mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
-  //TC
-  mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
-  mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
-  //S
-  mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
-  mpls_tunnel.entry = mpls_tunnel.entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
-  //TTL
-  mpls_tunnel.entry = mpls_tunnel.entry + (uint32_t)0;
-
-  
-  // build ethernet
-  struct sr_ethernet_hdr ethernet_hdr;
-  memcpy(ethernet_hdr.ether_dhost, destMac, 6);
-  memcpy(ethernet_hdr.ether_shost, iface[ifaceIndex].mac, 6);
-  ethernet_hdr.ether_type = htons(ETHERTYPE_ARP);
-
-
-  uint8_t *data = new uint8_t[sizeof(struct sr_ethernet_hdr) +  4  * 2/*MPLS header*/
-                   + sizeof(struct ip) + sizeof(struct sr_udp) + msg.length()];
-  memcpy(data, &ethernet_hdr, sizeof(struct sr_ethernet_hdr));
-  memcpy(data + sizeof(struct sr_ethernet_hdr), &mpls_vpn, 4);
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + 4, &mpls_tunnel, 4);
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + 4 * 2, &ip_header, sizeof(struct ip));
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + 4 * 2+ sizeof(struct ip), &udp_hdr, sizeof(struct sr_udp));
-  memcpy(data + sizeof(struct sr_ethernet_hdr) + 4 * 2+ sizeof(struct ip) + sizeof(struct sr_udp), &msg, msg.length());
-
-  Frame frame( sizeof(struct sr_ethernet_hdr) + 4 * 2 + sizeof(struct ip) + sizeof(struct sr_udp) + msg.length(), data);
-  sendFrame(frame, ifaceIndex);
-  return;
-}
 
 void changeMPLSlabel(struct mpls_label *label, int egress_label){
   uint32_t new_label = egress_label;
@@ -509,8 +389,12 @@ void changeMPLSlabel(struct mpls_label *label, int egress_label){
 }
 
 void SimulatedMachine::forwardMPLSPacket(uint8_t *data, int length, struct label_routing_node *target_router){
-  struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct mpls_label));
+  struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
+  int ingress_label = (label->entry & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
   changeMPLSlabel(label, target_router->egress_label);
+  cout << "the packet with label " << ingress_label << " forward with label " << target_router->egress_label << endl;
+  label->entry = htonl(label->entry);
+
 
   struct sr_ethernet_hdr *ether = (struct sr_ethernet_hdr*)(data);
   memcpy(ether->ether_shost, ether->ether_dhost, 6);
@@ -522,57 +406,103 @@ void SimulatedMachine::forwardMPLSPacket(uint8_t *data, int length, struct label
 }
 
 
-struct vrfi* getVRFi(int vpn_label){
-  for(int i = 0; i < vrf_name.size(); i++){
-    struct vrf *vrf_temp = vrf_table[vrf_name.at(i)];
-    for(int j = 0; j < vrf_temp->vrfi_array.size(); j++)
-      if(vrf_temp->vrfi_array.at(j)->vpn_label == vpn_label)
-        return vrf_temp->vrfi_array.at(j);
+void printBinary(uint32_t entry){
+  for(int i = 0; i < 32; i++){
+    uint32_t t = entry << i;
+    t = t >> 31;
+    cout << t;
   }
-  return NULL;
-}
-
-string getVPNname(int vpn_label){
-  for(int i = 0; i < vrf_name.size(); i++){
-    struct vrf *vrf_temp = vrf_table[vrf_name.at(i)];
-    for(int j = 0; j < vrf_temp->vrfi_array.size(); j++){
-      if(vrf_temp->vrfi_array.at(j)->vpn_label == vpn_label)
-        return vrf_name.at(i);
-    }
-  }
-  return NULL;
+  cout << endl;
 }
 
 
-void SimulatedMachine::handleVPNlabel(uint8_t *data, int length , int ifaceIndex){
-  struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
-  int vpn_label = (label->entry & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
-  struct vrfi *vrfi_dest = getVRFi(vpn_label);
-  if(vrfi_dest == NULL)
-    return;
-  string vpn = getVPNname(vpn_label);
-  for(int i = 0; i < default_table.size(); i++){
-    if((default_table.at(i)->ip & default_table.at(i)->mask) == (vrfi_dest->egress_ip & default_table.at(i)->mask)){
-      if(interface_vpn[default_table.at(i)->ifaceIndex] != vpn)
-        continue;
-      uint8_t *data_temp = new uint8_t[length - sizeof(struct mpls_label)];
-      memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
-      data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
-      memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
-      
-      
-      struct msg_stored msg_stored_temp;
-      msg_stored_temp.data = data_temp;
-      msg_stored_temp.length = length - sizeof(struct mpls_label);
-      if(arp_waiting_que[default_table.at(i)->egress_ip] != NULL)
-        arp_waiting_que.erase(default_table.at(i)->egress_ip);  
-      arp_waiting_que[default_table.at(i)->egress_ip] = &msg_stored_temp;
-      
-      sendARPReq(default_table.at(i)->ifaceIndex, default_table.at(i)->egress_ip);
-    }
+Frame* SimulatedMachine::addLabel(uint8_t *data, int frame_length, uint8_t *nextMAC, int vpn_label, int tunnel_label, uint32_t dest_ip){
+  struct sr_ethernet_hdr *ether = (struct sr_ethernet_hdr*)data;
+  memcpy(ether->ether_shost, ether->ether_dhost, 6);
+  memcpy(ether->ether_dhost, nextMAC, 6);
+  if(vpn_label != -1 || tunnel_label != -1)
+    ether->ether_type = htons(ETHERTYPE_MPLS);
+  
+  //********MPLS
+  //VPN label
+  struct mpls_label *mpls_vpn = new struct mpls_label;
+  //Tunnel label
+  struct mpls_label *mpls_tunnel = new struct mpls_label;
+  int vpn_size = 0;
+  int tunnel_size = 0;
+  if(vpn_label != -1){
+    vpn_size = 4;
+    //value
+    mpls_vpn->entry = (uint32_t)vpn_label;
+    mpls_vpn->entry = mpls_vpn->entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
+    //TC
+    mpls_vpn->entry = mpls_vpn->entry + (uint32_t)0;
+    mpls_vpn->entry = mpls_vpn->entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
+    //S
+    mpls_vpn->entry = mpls_vpn->entry + (uint32_t)1;
+    mpls_vpn->entry = mpls_vpn->entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
+    //TTL
+    mpls_vpn->entry = mpls_vpn->entry + (uint32_t)0;
+
+    cout << "the label " << vpn_label << " added to " << ip_binary_string(dest_ip) << endl;
+
+    mpls_vpn->entry = htonl(mpls_vpn->entry);
+
+  }
+  if(tunnel_label != -1){
+    tunnel_size = 4;
+    //value
+    mpls_tunnel->entry = (uint32_t)tunnel_label;
+    mpls_tunnel->entry = mpls_tunnel->entry << (MPLS_LS_LABEL_SHIFT - MPLS_LS_TC_SHIFT);
+    //TC
+    mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)0;
+    mpls_tunnel->entry = mpls_tunnel->entry << (MPLS_LS_TC_SHIFT - MPLS_LS_S_SHIFT);
+    //S
+    mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)0;
+    if(vpn_label == -1)
+      mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)1;
+    mpls_tunnel->entry = mpls_tunnel->entry << (MPLS_LS_S_SHIFT - MPLS_LS_TTL_SHIFT);
+    //TTL
+    mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)0;
+
+    cout << "the label " << tunnel_label << " added to " << ip_binary_string(dest_ip) << endl;
+    mpls_tunnel->entry = htonl(mpls_tunnel->entry);
   }
 
+  uint8_t *data_temp = new uint8_t[frame_length + tunnel_size + vpn_size];
+
+  memcpy(data_temp, ether, sizeof(struct sr_ethernet_hdr));
+  memcpy(data_temp + sizeof(struct sr_ethernet_hdr), &(mpls_tunnel->entry), tunnel_size);
+  memcpy(data_temp + sizeof(struct sr_ethernet_hdr) + tunnel_size, &(mpls_vpn->entry), vpn_size);
+  memcpy(data_temp + sizeof(struct sr_ethernet_hdr) + tunnel_size + vpn_size, 
+    data + sizeof(struct sr_ethernet_hdr), frame_length - sizeof(struct sr_ethernet_hdr));
+
+  Frame frame(frame_length + vpn_size + tunnel_size, data_temp);
+  return &frame;
 }
+
+string getVPNfromLS(string s){
+  int size = strlen(s.c_str());
+  size = size - 2;
+  char res_char[6];
+  for(int i = 0; i < 6; i++)
+    res_char[i] = s[i + 2];
+  string res = res_char;
+  return res;
+}
+
+
+Frame* SimulatedMachine::popLabel(uint8_t *data, int length){
+  uint8_t *data_temp = new uint8_t[length - sizeof(struct mpls_label)];
+  memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
+  data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
+  memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
+  Frame frame_temp(length - sizeof(struct mpls_label), data_temp);
+  return &frame_temp;
+}
+
+
+
 //********************************************************************************************End of Functions
 
 SimulatedMachine::SimulatedMachine (const ClientFramework *cf, int count) :
@@ -596,21 +526,12 @@ void SimulatedMachine::initialize () {
   char first_char_table = table_name[0];
   bool end = false;
   while(!end){
-    /*for (int i = 0; i < default_table.size(); i++){
-      cout << ip_binary_string(default_table.at(i)->ip);
-      cout << " " << ip_binary_string(default_table.at(i)->mask);
-      cout << " " << ip_binary_string(default_table.at(i)->egress_ip);
-      cout << " " << default_table.at(i)->ifaceIndex << endl;
-    }*/
-    cout << "Reading tables" << endl;
     switch(first_char_table){
-      case 'D': /*Default Table*/{
-        cout << "Default Table" << endl; 
+      case 'D': /*Default Table*/{ 
         string input;
         for(int i = 0; i < 5; i++)
           ss >> input;
         while(true){
-          cout << "in while" << endl;
           ss >> input;
           if(input[0] == 'I'){
             first_char_table = input[0];
@@ -626,14 +547,11 @@ void SimulatedMachine::initialize () {
           ss >> input_int;
           default_temp->ifaceIndex = input_int; 
           default_table.push_back(default_temp);
-          cout << "node added" << endl;
         }
-        cout << "Default table ended" << endl;
         break;
       }
 
       case 'I': /*Interface-vpn*/{
-        cout << "Interface-vpn" << endl;
         string input;
         for(int i = 0; i < 3; i++)
           ss >> input;
@@ -649,13 +567,10 @@ void SimulatedMachine::initialize () {
           ss >> input;
           interface_vpn[index] = input;
         }
-
-        cout << "Interface-vpn ended" << endl;
         break;
       }
 
       case 'V': /*Interface-vpn*/{
-        cout << "VRF Tables" << endl;
         string input;
         while(true){
           if(input[0] != 'v')
@@ -690,10 +605,8 @@ void SimulatedMachine::initialize () {
             else
               vrfi_temp->ifaceIndex = atoi(input.c_str());
             vrf_temp->vrfi_array.push_back(vrfi_temp);
-            cout << "new node vrfi added to " << vrf_temp->vpn_name << endl;
           }
           vrf_table[vrf_temp->vpn_name] = vrf_temp;
-          cout << "new vpn added : " << vrf_temp->vpn_name << endl;
           if(input[0] == 'T'){
             first_char_table = input[0];
             break;
@@ -703,9 +616,8 @@ void SimulatedMachine::initialize () {
       }
 
       case 'T': /*Tunnel Table*/{
-        cout << "Tunnel Table" << endl;
         string input;
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < 5; i++)
           ss >> input;
         while(true){
           ss >> input;
@@ -715,22 +627,24 @@ void SimulatedMachine::initialize () {
           }
           struct tunnel_node *tunnel_node_temp = new struct tunnel_node;
           tunnel_node_temp->ip = ip_string_binary(input);
-          // ss >> input;
-          // cout << input << " ";
-          // tunnel_node_temp.lsp = atoi(input.c_str());
           ss >> input;
-          tunnel_node_temp->tunnel_label = atoi(input.c_str());
+          if(input[0] == 'N')
+            tunnel_node_temp->tunnel_label = -1;
+          else
+            tunnel_node_temp->tunnel_label = atoi(input.c_str());
+          
           ss >> input;
           tunnel_node_temp->egress_interface = atoi(input.c_str());
+          ss >> input;
+          sscanf(input.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(tunnel_node_temp->nextMAC[0]), &(tunnel_node_temp->nextMAC[1]), 
+                    &(tunnel_node_temp->nextMAC[2]), &(tunnel_node_temp->nextMAC[3]), &(tunnel_node_temp->nextMAC[4]), 
+                    &(tunnel_node_temp->nextMAC[5]));
           tunnel_table.push_back(tunnel_node_temp);
-          cout << "new tunnel routing added" << endl;
         }
-        cout << "Tunnel Table ended" << endl;
         break;
       }
 
       case 'L': /*LS Table*/{
-        cout << "LS Table" << endl;
         string input;
         string cach_input;
         for(int i = 0; i < 5; i++)
@@ -746,15 +660,22 @@ void SimulatedMachine::initialize () {
             break;
           struct label_routing_node *ls_node = new struct label_routing_node;
           ls_node->ingress_label = atoi(input.c_str());
+          
           ss >> input;
-          ls_node->egress_label = atoi(input.c_str());
+          if(input[0] == 'P')
+            ls_node->egress_label = -1;
+          else
+            ls_node->egress_label = atoi(input.c_str());
+          
           ss >> input;
           ls_node->vpn = false;
           if(input[0] != 'v')
             sscanf(input.c_str(), "%hhx:%hhx:%hhx:%hhx:%hhx:%hhx", &(ls_node->nextMAC[0]), &(ls_node->nextMAC[1]), 
                     &(ls_node->nextMAC[2]), &(ls_node->nextMAC[3]), &(ls_node->nextMAC[4]), &(ls_node->nextMAC[5]));
-          else
+          else{
             ls_node->vpn = true;
+            ls_node->vpn_name = getVPNfromLS(input);
+          }
           ss >> input;
           cach_input = input;
           if(input[0] == 'N')
@@ -762,9 +683,7 @@ void SimulatedMachine::initialize () {
           else
             ls_node->egress_interface = atoi(input.c_str());
           label_routing_table.push_back(ls_node);
-          cout << "new ls node added" << endl;
         }
-        cout << "LS Table ended" << endl;
         end = true;
         break;
       }
@@ -798,25 +717,21 @@ void SimulatedMachine::initialize () {
  */
 void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
   // TODO: process the raw frame; frame.data points to the frame's byte stream
-  cerr << "Frame received at iface " << ifaceIndex <<
-    " with length " << frame.length << endl;
+  /*cerr << "Frame received at iface " << ifaceIndex <<
+    " with length " << frame.length << endl;*/
 
   uint8_t *data = new uint8_t [frame.length];
+  int frame_length = frame.length;
   memcpy(data, frame.data, frame.length);
   
   struct sr_ethernet_hdr *ether = (struct sr_ethernet_hdr*)data;
 
   //***************************************** MPLS *****************************************// 
   if(ntohs(ether->ether_type) == ETHERTYPE_MPLS){
-    cout << "MPLS" << endl;
     struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
+    label->entry = ntohl(label->entry);
 
-    /*int s = (label->entry & MPLS_LS_S_MASK) >> MPLS_LS_S_SHIFT;
-    //label is the VPN-label
-    if(s == 1){
 
-      return;
-    }*/
 
     int ingress_label = (label->entry & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
     struct label_routing_node *target_router = getLabelNode(ingress_label);
@@ -824,11 +739,48 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
       return;
     
     if(target_router->egress_label == -1){ /* POP */
-      uint8_t *data_temp = new uint8_t[frame.length - sizeof(struct mpls_label)];
-      memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
-      data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
-      memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, frame.length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
-      handleVPNlabel(data, frame.length - sizeof(struct mpls_label), ifaceIndex);
+      if(!target_router->vpn){/*just POP the label and forward*/
+        //Frame *frame_temp = popLabel(data, frame_length);
+
+        uint8_t *data_temp = new uint8_t[frame.length - sizeof(struct mpls_label)];
+        memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
+        data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
+        memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, frame.length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
+        
+        struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
+        memcpy(ether_dest->ether_shost, ether_dest->ether_dhost, 6);
+        memcpy(ether_dest->ether_dhost, target_router->nextMAC, 6);
+
+
+        Frame frame_temp(frame.length - sizeof(struct mpls_label), data_temp);
+
+        cout << "the label of the packet with label " << ingress_label << " popped" <<endl;
+        sendFrame(frame_temp, target_router->egress_interface);
+        return;
+      }
+      else{/*look in vrfs*/
+        struct vrfi *vrfi_dest = getVRFi_by_label_vrf(ingress_label, vrf_table[target_router->vpn_name]);
+        //Frame *frame_temp = popLabel(data, frame_length);
+        uint8_t *data_temp = new uint8_t[frame.length - sizeof(struct mpls_label)];
+        memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
+        data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
+        memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, frame.length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
+        
+        struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
+        memcpy(ether_dest->ether_shost, ether_dest->ether_dhost, 6);
+        ether_dest->ether_type = htons(ETHERTYPE_IP);
+
+        Frame frame_temp(frame.length - sizeof(struct mpls_label), data_temp);
+
+        struct msg_stored *msg_stored_temp = new struct msg_stored;
+        msg_stored_temp->data = new uint8_t[frame_temp.length];
+        msg_stored_temp->data = frame_temp.data;
+        msg_stored_temp->length = frame_temp.length;
+        arp_waiting_que[vrfi_dest->egress_ip] = msg_stored_temp;
+
+        sendARPReq(vrfi_dest->ifaceIndex, vrfi_dest->egress_ip);
+        return;
+      }
     }
     if(target_router->egress_label != -1){ /* change label*/
       forwardMPLSPacket(data, frame.length, target_router);
@@ -839,7 +791,6 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
   //***************************************** ARP *****************************************//
   if(ntohs(ether->ether_type) == ETHERTYPE_ARP){
-    cout << "ARP" << endl;
     struct arp *arp = (struct arp*)(data + sizeof(struct sr_ethernet_hdr));
     //An ARP Requset arrived
     if(ntohs(arp->arp_op) == ARP_OP_REQUEST){
@@ -849,34 +800,27 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
     }
     //An ARP Reply arrived
     if(ntohs(arp->arp_op) == ARP_OP_REPLY){
-      cout << "ARP Reply" << endl;
       if(ntohl(arp->arp_ip_dest) == iface[ifaceIndex].getIp()){
-        cout << "for me" << endl;
         if(arp_waiting_que[ntohl(arp->arp_ip_source)] != NULL){
-          cout << "saved msg founded" << endl;
           struct msg_stored *awaken_msg = arp_waiting_que[ntohl(arp->arp_ip_source)];
           uint8_t destMac[6];
           memcpy(destMac, arp->arp_eth_source, 6);
-          /*if(awaken_msg->vpn_label == -1)
-            sendPacket(awaken_msg->destIp, destMac, awaken_msg->ifaceIndex, awaken_msg->msg);
-          if(awaken_msg->vpn_label > 0)
-            sendMPLSPacket(awaken_msg->destIp, destMac, awaken_msg->ifaceIndex, awaken_msg->msg,
-                         awaken_msg->vpn_label, awaken_msg->tunnel_table);*/
-          cout << "here" << endl;
           uint8_t *data_temp = awaken_msg->data;
           struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
-          cout << "here2" << endl;
           memcpy(ether_dest->ether_dhost, destMac, 6);
-          cout << "here3" << endl;
           Frame frame_temp(awaken_msg->length, data_temp);
-          cout << "here4" << endl;
+
+          struct ip *ip_dest = (struct ip*)(data_temp + sizeof(struct sr_ethernet_hdr));
+
+
           sendFrame(frame_temp, ifaceIndex);
-          cout << "earse th saved msg" << endl;
+          cout << "the packet for " <<  ip_binary_string(ntohl(ip_dest->ip_dst.s_addr)) << " forwarded to " << 
+                ip_binary_string(ntohl(arp->arp_ip_source)) << " on " << ifaceIndex << endl;
           arp_waiting_que.erase(ntohl(arp->arp_ip_source));
           return;
         }
         else{
-          cout << "saved masg not founded" << endl;
+          /*cout << "saved masg not founded" << endl;*/
           return;
         }
       }
@@ -894,10 +838,15 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         struct sr_udp *udp = (struct sr_udp*)(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip));
         if(ntohs(udp->port_src) == 5000  && ntohs(udp->port_dst) == 3000){
           int str_len = ntohs(udp->length) - sizeof(struct sr_udp);
-          string *msg = new string[str_len];
-          memcpy(msg, data + sizeof(struct sr_udp), str_len);
 
-          cout << "A message from " << getIPString(ntohl(iphdr->ip_src.s_addr)) << " : " << *msg << endl;
+          char *msg_char = new char[str_len + 1];
+
+          memcpy(msg_char, data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp), str_len);
+          msg_char[str_len] = '\0';
+          uint8_t *data_temp_temp =  data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp);
+          string msg = msg_char;
+
+          cout << "A message from " << getIPString(ntohl(iphdr->ip_src.s_addr)) << " : " << msg << endl;
           return;
         }
       }
@@ -907,39 +856,77 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
     //****** Forward *****//
     else{
-      //Get VRFi by dst IP and input Interface
-      struct vrfi *vrfi_dest = getVRFi_inVRF(ntohl(iphdr->ip_dst.s_addr), vrf_table[interface_vpn[ifaceIndex]]);
-      if(vrfi_dest == NULL)
-        return;
-      //Search in default table
-        struct default_node *node = getDefault(vrfi_dest->egress_ip);
-        if(node == NULL)
+      if(interface_vpn[ifaceIndex][0] != 'N'){/*Forward with MPLS label*/
+        //Get VRFi by dst IP and input Interface
+        struct vrfi *vrfi_dest = getVRFi_inVRF(ntohl(iphdr->ip_dst.s_addr), vrf_table[interface_vpn[ifaceIndex]]);
+        if(vrfi_dest == NULL)
           return;
-      //Get Tunnel Label
-      struct tunnel_node *tunnel_dest = getTunnelNode(vrfi_dest->egress_ip);
-      if(tunnel_dest == NULL)
+        cout << "a packet from " << interface_vpn[ifaceIndex] << " received\n";
+        //send packet directly to dest without any label
+        if(vrfi_dest->ifaceIndex != -1){
+          if(ifaceIndex != vrfi_dest->ifaceIndex){
+            memcpy(ether->ether_shost, ether->ether_dhost, 6);
+            struct msg_stored *msg_stored_temp = new struct msg_stored;
+            msg_stored_temp->data = data;
+            msg_stored_temp->length = frame_length;
+            arp_waiting_que[vrfi_dest->egress_ip] = msg_stored_temp;
+
+            sendARPReq(vrfi_dest->ifaceIndex, vrfi_dest->egress_ip);
+            return;
+          }
+          else{
+            uint8_t tempMac[6];
+            memcpy(tempMac, ether->ether_shost, 6);
+            memcpy(ether->ether_shost, ether->ether_dhost, 6);
+            memcpy(ether->ether_dhost, tempMac, 6);
+            Frame frame_temp(frame_length, data);
+            sendFrame(frame_temp, ifaceIndex);
+            return; 
+          }
+        }
+        //search in non CE neighbors
+        int neigh_index = getNeighbor(vrfi_dest->egress_ip);
+        if(neigh_index != -1){
+          /*TODO write this part*/
+        }
+        //Get Tunnel Label
+        struct tunnel_node *tunnel_dest = getTunnelNode(vrfi_dest->egress_ip);
+        if(tunnel_dest == NULL)
+          return;
+        Frame *frame_temp = addLabel(data, frame_length, tunnel_dest->nextMAC, vrfi_dest->vpn_label, tunnel_dest->tunnel_label, vrfi_dest->egress_ip);
+        sendFrame(*frame_temp, tunnel_dest->egress_interface);
         return;
+      }
+      else{/*normal routing*/
+        int neigh_index = getNeighbor(ntohl(iphdr->ip_dst.s_addr)); /*check neighbors*/
+        if(neigh_index != -1){
+          memcpy(ether->ether_shost, iface[neigh_index].mac, 6);
 
-      struct sr_udp *udp = (struct sr_udp*)(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip));
-      int str_len = ntohs(udp->length) - sizeof(struct sr_udp);
-      string *msg = new string[str_len];
-      memcpy(msg, data + sizeof(struct sr_udp), str_len);
 
-      struct msg_stored *save_msg = new struct msg_stored;
-      /*save_msg.egress_ip = node->egress_ip;
-      save_msg.ifaceIndex = node->ifaceIndex;
-      save_msg.destIp = destIp;
-      save_msg.msg = msg;
-      save_msg.vpn_label = vrfi_dest->vpn_label;
-      save_msg.tunnel_table = tunnel_node->tunnel_label;*/
-      Frame *frame = createMPLS_IP_packet(ntohl(iphdr->ip_dst.s_addr), broadcastMAC, node->ifaceIndex, vrfi_dest->vpn_label, tunnel_dest->tunnel_label, *msg);
-      save_msg->data = frame->data;
-      save_msg->length = frame->length;
+          struct msg_stored *save_msg = new struct msg_stored;
+          save_msg->data = data;
+          save_msg->length = frame_length;
+          arp_waiting_que[ntohl(iphdr->ip_dst.s_addr)] = save_msg;
 
-      arp_waiting_que[node->egress_ip] = save_msg;
+          sendARPReq(neigh_index, ntohl(iphdr->ip_dst.s_addr));
+          return;
+        }
+        //Search in default table
+        struct default_node *node = getDefault(ntohl(iphdr->ip_dst.s_addr));
+        if(node == NULL){
+          cout << "Destination is unreachable" << endl;
+          return;
+        }
+        memcpy(ether->ether_shost, iface[node->ifaceIndex].mac, 6);
 
-      sendARPReq(node->ifaceIndex, node->egress_ip);
-      return;
+        struct msg_stored *msg_stored_temp = new struct msg_stored;
+        msg_stored_temp->data = data;
+        msg_stored_temp->length = frame_length;
+        arp_waiting_que[node->egress_ip] = msg_stored_temp;
+
+        sendARPReq(node->ifaceIndex, node->egress_ip);
+        return;
+      }
     }
     //****** End of Forward *****//    
   }
@@ -955,7 +942,6 @@ void SimulatedMachine::run () {
   std::string command;
   while (cin >> command) {
     if (command == "send") {
-      cout << "send" << endl;
       string str_destIp;
       string str_vrfIndex;
       string msg;
@@ -967,60 +953,65 @@ void SimulatedMachine::run () {
       if(str_vrfIndex != "--"){
         //Search vrf_table
         struct vrf *vrf_dest = vrf_table[str_vrfIndex];
-        if(vrf_dest == NULL)
-          return;
+        if(vrf_dest == NULL){
+          continue;
+        }
         struct vrfi *vrfi_dest = getVRFi_inVRF(destIp, vrf_dest);
         if(vrfi_dest == NULL)
-          return;
-        
+          continue;
+        if(vrfi_dest->ifaceIndex != -1){
+          Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, vrfi_dest->ifaceIndex, -1, -1, msg);
 
-        //Search in default table
-        struct default_node *node = getDefault(vrfi_dest->egress_ip);
+          struct msg_stored *save_msg = new struct msg_stored;
+          save_msg->data = frame->data;
+          save_msg->length = frame->length;
 
-        if(node == NULL){
-          cout << "Destination is unreachable" << endl;
-          return;
+          arp_waiting_que[destIp] = save_msg;
+          sendARPReq(vrfi_dest->ifaceIndex, destIp);
+          continue;
         }
 
-        struct tunnel_node *tunnel_node = getTunnelNode(vrfi_dest->egress_ip);
-        if(tunnel_node == NULL)
-          return;
+        struct tunnel_node *tunnel_node_temp = getTunnelNode(vrfi_dest->egress_ip);
+        if(tunnel_node_temp == NULL)
+          continue;
 
-        struct msg_stored save_msg;
-        Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, node->ifaceIndex, vrfi_dest->vpn_label, tunnel_node->tunnel_label, msg);
-        save_msg.data = new uint8_t[frame->length];
-        save_msg.data = frame->data;
-        save_msg.length = frame->length;
+        Frame *frame = createMPLS_IP_packet(destIp, tunnel_node_temp->nextMAC, tunnel_node_temp->egress_interface, 
+                      vrfi_dest->vpn_label, tunnel_node_temp->tunnel_label, msg);
 
-        arp_waiting_que[node->egress_ip] = &save_msg;
-
-        sendARPReq(node->ifaceIndex, node->egress_ip);
-        return;
+        sendFrame(*frame, tunnel_node_temp->egress_interface);
+        continue;
       }
       else{
-        cout << "send without vrf" << endl;
+        int neigh_index = getNeighbor(destIp);
+        if(neigh_index != -1){
+          struct msg_stored *save_msg = new struct msg_stored;
+
+          Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, neigh_index, -1, -1, msg);
+          save_msg->data = frame->data;
+          save_msg->length = frame->length;
+
+          arp_waiting_que[destIp] = save_msg;
+
+          sendARPReq(neigh_index, destIp);
+          continue;
+        }
         //Search in default table
         struct default_node *node = getDefault(destIp);
-        cout << ip_binary_string(node->ip) << endl;
         if(node == NULL){
           cout << "Destination is unreachable" << endl;
-          return;
+          continue;
         }
 
-        cout << "create msg" << endl;
         struct msg_stored *save_msg = new struct msg_stored;
 
-        cout << node->ifaceIndex << endl;
         Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, node->ifaceIndex, -1, -1, msg);
         save_msg->data = frame->data;
         save_msg->length = frame->length;
 
-        cout << "save msg" << endl;
         arp_waiting_que[node->egress_ip] = save_msg;
 
-        cout << "sending arp" << endl;
         sendARPReq(node->ifaceIndex, node->egress_ip);
-        return;
+        continue;
       }
 
     }

@@ -139,6 +139,7 @@
             <ptl:value>Tunnel Table</ptl:value>
               <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
               <ptl:value>192.168.115.2 55           1                00:24:8C:01:82:06</ptl:value>
+              <ptl:value>192.168.113.1 N/A          0                00:24:8C:01:81:01</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -188,6 +189,7 @@
             <ptl:value>Tunnel Table</ptl:value>
               <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
               <ptl:value>192.168.113.1 55           0                00:24:8C:01:83:01</ptl:value>
+              <ptl:value>192.168.115.2 N/A          1                00:24:8C:01:84:01</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -279,7 +281,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -368,13 +370,13 @@
       <ptl:item>00:24:8C:01:81:01</ptl:item>
     </ptl:mac>
     <ptl:ipv4 ptl:name="node1-interface1-ip">
-      <ptl:item>192.168.117.1</ptl:item>
+      <ptl:item>192.168.113.1</ptl:item>
     </ptl:ipv4>
     <ptl:mac ptl:name="node1-interface2-mac">
       <ptl:item>00:24:8C:01:88:01</ptl:item>
     </ptl:mac>
     <ptl:ipv4 ptl:name="node1-interface2-ip">
-      <ptl:item>192.168.121.1</ptl:item>
+      <ptl:item>192.168.117.1</ptl:item>
     </ptl:ipv4>
 
     <ptl:mac ptl:name="node2-interface0-mac">

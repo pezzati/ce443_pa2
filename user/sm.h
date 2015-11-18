@@ -18,6 +18,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
+ * along with Partov.  If not, see <http://www.gnu.org/licenses/>.
  *  
  */
 
@@ -30,10 +31,12 @@
 #include <string.h>
 #include <stdio.h>
 
+
 using namespace std;
 
 class SimulatedMachine : public Machine {
 public:
+
 	SimulatedMachine (const ClientFramework *cf, int count);
 	virtual ~SimulatedMachine ();
 
@@ -50,6 +53,9 @@ public:
 	void sendMPLSPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string msg, int vpn_label, int tunnel_label);
 	void sendPacket(uint32_t destIp, uint8_t *destMac, int ifaceIndex, string msg);
 	void sendARPRes(uint8_t *data, int ifaceIndex);
+	int getNeighbor(uint32_t ip);
+	Frame* addLabel(uint8_t *data, int frame_length, uint8_t *nextMAC, int vpn_label, int tunnel_table, uint32_t dest_ip);
+	Frame* popLabel(uint8_t *data, int length);
 };
 
 #endif /* sm.h */

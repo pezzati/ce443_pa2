@@ -25,6 +25,10 @@
  *
  */
 
+/**
+ * sr_protocol.h
+ *
+ */
 
 #ifndef SR_PROTOCOL_H
 #define SR_PROTOCOL_H
@@ -135,7 +139,7 @@ struct sr_ethernet_hdr
 #endif
 
 #ifndef ETHERTYPE_MPLS
-#define ETHERTYPE_MPLS          0x08847 /* ARP protocl */
+#define ETHERTYPE_MPLS          0x08848 /* MPLS protocl */
 #endif
 
 struct sr_tcp
