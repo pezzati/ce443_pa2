@@ -328,7 +328,6 @@ void SimulatedMachine::sendARPReq( int ifaceIndex, uint32_t egress_ip){
   //build ARP req
   struct arp arp;
   arp.arp_hard_type = htons(HTYPE_Ether);
-  printf("%x\n", arp.arp_hard_type);
   arp.arp_proto_type = htons(PTYPE_IPv4);
   arp.arp_hard_size = HLEN_Ether;
   arp.arp_proto_size = PLEN_IPv4;
@@ -352,7 +351,7 @@ void SimulatedMachine::sendARPReq( int ifaceIndex, uint32_t egress_ip){
   Frame frame( sizeof(struct sr_ethernet_hdr) + sizeof(struct arp), data);
   sendFrame(frame, ifaceIndex);
 
-  cout << "the ARP requset sent for " << ip_binary_string(egress_ip)<< "." << endl;
+  cout << "the ARP requset sent for " << ip_binary_string(egress_ip) << endl;
   return;
 }
 
@@ -376,7 +375,7 @@ void SimulatedMachine::sendARPRes(uint8_t *data, int ifaceIndex){
   Frame frame( sizeof(struct sr_ethernet_hdr) + sizeof(struct arp), data);
   sendFrame(frame, ifaceIndex);
 
-  cout << "the ARP response sent to " <<  ip_binary_string(ntohl(arp->arp_ip_dest)) << "." << endl;
+  cout << "the ARP response sent to " <<  ip_binary_string(ntohl(arp->arp_ip_dest)) << endl;
   return;
 }
 
@@ -392,7 +391,8 @@ void SimulatedMachine::forwardMPLSPacket(uint8_t *data, int length, struct label
   struct mpls_label *label = (struct mpls_label*)(data + sizeof(struct sr_ethernet_hdr));
   int ingress_label = (label->entry & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
   changeMPLSlabel(label, target_router->egress_label);
-  cout << "the packet with label " << ingress_label << " forward with label " << target_router->egress_label << endl;
+  cout << "the packet with label " << ingress_label << " forward with label " << target_router->egress_label 
+    << " on " << target_router->egress_interface << endl;
   label->entry = htonl(label->entry);
 
 
@@ -477,8 +477,8 @@ Frame* SimulatedMachine::addLabel(uint8_t *data, int frame_length, uint8_t *next
   memcpy(data_temp + sizeof(struct sr_ethernet_hdr) + tunnel_size + vpn_size, 
     data + sizeof(struct sr_ethernet_hdr), frame_length - sizeof(struct sr_ethernet_hdr));
 
-  Frame frame(frame_length + vpn_size + tunnel_size, data_temp);
-  return &frame;
+  Frame *frame = new Frame(frame_length + vpn_size + tunnel_size, data_temp);
+  return frame;
 }
 
 string getVPNfromLS(string s){
@@ -755,10 +755,17 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         Frame frame_temp(frame.length - sizeof(struct mpls_label), data_temp);
 
         cout << "the label of the packet with label " << ingress_label << " popped" <<endl;
+
+        struct mpls_label *vpn_label = (struct mpls_label*)(data_temp + sizeof(struct sr_ethernet_hdr));
+        int out_label = (ntohl(vpn_label->entry) & MPLS_LS_LABEL_MASK) >> MPLS_LS_LABEL_SHIFT;
+
+        cout << "the pakcet with label " << out_label << " forwarded on "  << target_router->egress_interface << endl;
         sendFrame(frame_temp, target_router->egress_interface);
         return;
       }
       else{/*look in vrfs*/
+
+        cout << "the label of the packet with label " << ingress_label << " popped" <<endl;
         struct vrfi *vrfi_dest = getVRFi_by_label_vrf(ingress_label, vrf_table[target_router->vpn_name]);
         //Frame *frame_temp = popLabel(data, frame_length);
         uint8_t *data_temp = new uint8_t[frame.length - sizeof(struct mpls_label)];
@@ -843,7 +850,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
           memcpy(msg_char, data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp), str_len);
           msg_char[str_len] = '\0';
-          uint8_t *data_temp_temp =  data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp);
+          //uint8_t *data_temp_temp =  data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp);
           string msg = msg_char;
 
           cout << "A message from " << getIPString(ntohl(iphdr->ip_src.s_addr)) << " : " << msg << endl;
@@ -875,6 +882,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
             return;
           }
           else{
+            cout << "forward to it self" << endl;
             uint8_t tempMac[6];
             memcpy(tempMac, ether->ether_shost, 6);
             memcpy(ether->ether_shost, ether->ether_dhost, 6);
@@ -884,16 +892,17 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
             return; 
           }
         }
-        //search in non CE neighbors
-        int neigh_index = getNeighbor(vrfi_dest->egress_ip);
-        if(neigh_index != -1){
-          /*TODO write this part*/
-        }
         //Get Tunnel Label
         struct tunnel_node *tunnel_dest = getTunnelNode(vrfi_dest->egress_ip);
         if(tunnel_dest == NULL)
           return;
         Frame *frame_temp = addLabel(data, frame_length, tunnel_dest->nextMAC, vrfi_dest->vpn_label, tunnel_dest->tunnel_label, vrfi_dest->egress_ip);
+        if(vrfi_dest->vpn_label != -1 || tunnel_dest->tunnel_label != -1){
+          int out_label = tunnel_dest->tunnel_label;
+          if(tunnel_dest->tunnel_label == -1)
+            out_label = vrfi_dest->vpn_label;
+          cout << "the pakcet with label " << out_label << " forwarded on "  << tunnel_dest->egress_interface << endl;
+        }
         sendFrame(*frame_temp, tunnel_dest->egress_interface);
         return;
       }
@@ -977,7 +986,12 @@ void SimulatedMachine::run () {
 
         Frame *frame = createMPLS_IP_packet(destIp, tunnel_node_temp->nextMAC, tunnel_node_temp->egress_interface, 
                       vrfi_dest->vpn_label, tunnel_node_temp->tunnel_label, msg);
-
+        if(vrfi_dest->vpn_label != -1 || tunnel_node_temp->tunnel_label != -1){
+          int out_label = tunnel_node_temp->tunnel_label;
+          if(tunnel_node_temp->tunnel_label == -1)
+            out_label = vrfi_dest->vpn_label;
+          cout << "the pakcet with label " << out_label << " forwarded on "  << tunnel_node_temp->egress_interface << endl;
+        }
         sendFrame(*frame, tunnel_node_temp->egress_interface);
         continue;
       }
