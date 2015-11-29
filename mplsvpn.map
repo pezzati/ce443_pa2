@@ -9,6 +9,9 @@
       <ptl:link ptl:name="lk-node-4" ptl:protocol="802.3" ptl:log="true"></ptl:link>
       <ptl:link ptl:name="lk-node-5" ptl:protocol="802.3" ptl:log="true"></ptl:link>
       <ptl:link ptl:name="lk-node-6" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node-7" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node-8" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node-9" ptl:protocol="802.3" ptl:log="true"></ptl:link>
   </ptl:links>
 
   <ptl:nodes>
@@ -26,6 +29,7 @@
             <ptl:value>Default Table</ptl:value>
                 <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
                 <ptl:value>192.168.117.0 255.255.255.240 192.168.111.1 0</ptl:value>
+                <ptl:value>192.168.118.0 255.255.255.240 192.168.111.1 0</ptl:value>
 
             <ptl:value>Interface-VPN Table</ptl:value>
               <ptl:value>Interface    VPN-Name</ptl:value>
@@ -70,6 +74,8 @@
                 <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
                 <ptl:value>192.168.115.0 255.255.255.0   192.168.113.2 1</ptl:value>
                 <ptl:value>192.168.114.0 255.255.255.0   192.168.113.2 1</ptl:value>
+                <ptl:value>192.168.112.0 255.255.255.0   192.168.113.2 1</ptl:value>
+                <ptl:value>192.168.116.0 255.255.255.0   192.168.113.2 1</ptl:value>
 
             <ptl:value>Interface-VPN Table</ptl:value>
               <ptl:value>Interface    VPN-Name</ptl:value>
@@ -82,6 +88,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 40         192.168.115.2 N/A</ptl:value>
               <ptl:value>192.168.111.0 255.255.255.240 35         192.168.111.2 0</ptl:value>
+              <ptl:value>192.168.118.0 255.255.255.240 30         192.168.112.2 N/A</ptl:value>
               <ptl:value>vpn-B</ptl:value>
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 41         192.168.117.2 2</ptl:value>
@@ -108,11 +115,17 @@
           <ptl:netmask>255.255.255.0</ptl:netmask>
           <ptl:connected-to-link ptl:name="lk-node-1" ptl:running="true"/>
         </ptl:ethernet-interface>
-  <ptl:ethernet-interface>
+        <ptl:ethernet-interface>
           <ptl:mac-address-ref>node2-interface1-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node2-interface1-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-6" ptl:running="true"/>
+        <ptl:connected-to-link ptl:name="lk-node-6" ptl:running="true"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node2-interface2-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node2-interface2-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node-7" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -120,17 +133,20 @@
             <ptl:value>Default Table</ptl:value>
                 <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
                 <ptl:value>192.168.115.0 255.255.255.0   192.168.114.2 1</ptl:value>
+                <ptl:value>192.168.116.0 255.255.255.0   192.168.114.2 1</ptl:value>
 
             <ptl:value>Interface-VPN Table</ptl:value>
               <ptl:value>Interface    VPN-Name</ptl:value>
               <ptl:value>0            N/A</ptl:value>
               <ptl:value>1            N/A</ptl:value>
+              <ptl:value>2            N/A</ptl:value>
 
             <ptl:value>VRF-Tables</ptl:value>
               <ptl:value>vpn-A</ptl:value>
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 40         192.168.115.2 N/A</ptl:value>
               <ptl:value>192.168.111.0 255.255.255.240 35         192.168.113.1 N/A</ptl:value>
+              <ptl:value>192.168.118.0 255.255.255.240 30         192.168.112.2 N/A</ptl:value>
               <ptl:value>vpn-B</ptl:value>
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 41         192.168.113.1 N/A</ptl:value>
@@ -158,11 +174,17 @@
           <ptl:netmask>255.255.255.0</ptl:netmask>
           <ptl:connected-to-link ptl:name="lk-node-6" ptl:running="true"/>
         </ptl:ethernet-interface>
-  <ptl:ethernet-interface>
+        <ptl:ethernet-interface>
           <ptl:mac-address-ref>node7-interface1-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node7-interface1-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-2" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node-2" ptl:running="true"/>
+        </ptl:ethernet-interface>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node7-interface2-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node7-interface2-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node-8" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -170,17 +192,20 @@
             <ptl:value>Default Table</ptl:value>
                 <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
                 <ptl:value>192.168.113.0 255.255.255.0   192.168.114.1 0</ptl:value>
+                <ptl:value>192.168.112.0 255.255.255.0   192.168.114.1 0</ptl:value>
 
             <ptl:value>Interface-VPN Table</ptl:value>
               <ptl:value>Interface    VPN-Name</ptl:value>
               <ptl:value>0            N/A</ptl:value>
               <ptl:value>1            N/A</ptl:value>
+              <ptl:value>2            N/A</ptl:value>
 
             <ptl:value>VRF-Tables</ptl:value>
               <ptl:value>vpn-A</ptl:value>
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 40         192.168.115.2 N/A</ptl:value>
               <ptl:value>192.168.111.0 255.255.255.240 35         192.168.113.1 N/A</ptl:value>
+              <ptl:value>192.168.118.0 255.255.255.240 30         192.168.116.2 N/A</ptl:value>
               <ptl:value>vpn-B</ptl:value>
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 41         192.168.113.1 N/A</ptl:value>
@@ -199,6 +224,96 @@
       </ptl:parameters>
     </ptl:plugin>
 
+
+
+    <ptl:plugin ptl:name="node8" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node8-interface0-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node8-interface0-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node-7" ptl:running="true"/>
+        </ptl:ethernet-interface>
+  <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node8-interface1-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node8-interface1-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+      <ptl:connected-to-link ptl:name="lk-node-8" ptl:running="true"/>
+        </ptl:ethernet-interface>
+  <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node8-interface2-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node8-interface2-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.252</ptl:netmask>
+      <ptl:connected-to-link ptl:name="lk-node-9" ptl:running="true"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+                <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
+                <ptl:value>192.168.115.0 255.255.255.0   192.168.116.1 1</ptl:value>
+                <ptl:value>192.168.114.0 255.255.255.0   192.168.116.1 1</ptl:value>
+                <ptl:value>192.168.113.0 255.255.255.0   192.168.112.1 0</ptl:value>
+
+            <ptl:value>Interface-VPN Table</ptl:value>
+              <ptl:value>Interface    VPN-Name</ptl:value>
+              <ptl:value>0            N/A</ptl:value>
+              <ptl:value>1            N/A</ptl:value>
+              <ptl:value>2            vpn-A</ptl:value>
+
+            <ptl:value>VRF-Tables</ptl:value>
+              <ptl:value>vpn-A</ptl:value>
+              <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
+              <ptl:value>192.168.117.0 255.255.255.240 40         192.168.115.2 N/A</ptl:value>
+              <ptl:value>192.168.111.0 255.255.255.240 35         192.168.113.1 N/A</ptl:value>
+              <ptl:value>192.168.118.0 255.255.255.240 30         192.168.118.1 2</ptl:value>
+              <ptl:value>vpn-B</ptl:value>
+              <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
+              <ptl:value>192.168.117.0 255.255.255.240 41         192.168.113.1 N/A</ptl:value>
+              <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
+
+            <ptl:value>Tunnel Table</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+
+            <ptl:value>LS Table</ptl:value>
+              <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
+              <ptl:value>30            POP          v:vpn-A           N/A</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
+    </ptl:plugin>
+
+
+    <ptl:plugin ptl:name="node9" ptl:plugin-identifier="SimulatedNode">
+      <ptl:interfaces>
+        <ptl:ethernet-interface>
+          <ptl:mac-address-ref>node9-interface0-mac</ptl:mac-address-ref>
+          <ptl:ip-address-ref>node9-interface0-ip</ptl:ip-address-ref>
+          <ptl:netmask>255.255.255.0</ptl:netmask>
+          <ptl:connected-to-link ptl:name="lk-node-9" ptl:running="true"/>
+        </ptl:ethernet-interface>
+      </ptl:interfaces>
+      <ptl:parameters>
+          <ptl:param ptl:name="custom-information">
+            <ptl:value>Default Table</ptl:value>
+                <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
+                <ptl:value>192.168.117.0 255.255.255.240 192.168.118.1 0</ptl:value>
+                <ptl:value>192.168.111.0 255.255.255.240 192.168.118.1 0</ptl:value>
+
+            <ptl:value>Interface-VPN Table</ptl:value>
+              <ptl:value>Interface    VPN-Name</ptl:value>
+              <ptl:value>0            N/A</ptl:value>
+
+            <ptl:value>VRF-Tables</ptl:value>
+              <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
+
+            <ptl:value>Tunnel Table</ptl:value>
+              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+
+            <ptl:value>LS Table</ptl:value>
+              <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
+          </ptl:param>
+      </ptl:parameters>
+    </ptl:plugin>
 
 
 
@@ -229,6 +344,8 @@
                 <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
                 <ptl:value>192.168.113.0 255.255.255.0   192.168.115.1 0</ptl:value>
                 <ptl:value>192.168.114.0 255.255.255.0   192.168.115.1 0</ptl:value>
+                <ptl:value>192.168.116.0 255.255.255.0   192.168.115.1 0</ptl:value>
+                <ptl:value>192.168.112.0 255.255.255.0   192.168.115.1 0</ptl:value>
 
             <ptl:value>Interface-VPN Table</ptl:value>
               <ptl:value>Interface    VPN-Name</ptl:value>
@@ -241,6 +358,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 40         192.168.117.2 1</ptl:value>
               <ptl:value>192.168.111.0 255.255.255.240 35         192.168.113.1 N/A</ptl:value>
+              <ptl:value>192.168.118.0 255.255.255.240 30         192.168.116.2 N/A</ptl:value>
               <ptl:value>vpn-B</ptl:value>
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 41         192.168.113.1 N/A</ptl:value>
@@ -272,6 +390,7 @@
             <ptl:value>Default Table</ptl:value>
                 <ptl:value>IP            MASK            Next-Hop      Next-Hop-Interface</ptl:value>
                 <ptl:value>192.168.111.0 255.255.255.240 192.168.117.1 0</ptl:value>
+                <ptl:value>192.168.118.0 255.255.255.240 192.168.117.1 0</ptl:value>
 
             <ptl:value>Interface-VPN Table</ptl:value>
               <ptl:value>Interface    VPN-Name</ptl:value>
@@ -391,6 +510,12 @@
     <ptl:ipv4 ptl:name="node2-interface1-ip">
       <ptl:item>192.168.114.1</ptl:item>
     </ptl:ipv4>
+    <ptl:mac ptl:name="node2-interface2-mac">
+      <ptl:item>00:24:8C:01:83:02</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node2-interface2-ip">
+      <ptl:item>192.168.112.1</ptl:item>
+    </ptl:ipv4>
 
     <ptl:mac ptl:name="node3-interface0-mac">
       <ptl:item>00:24:8C:01:84:01</ptl:item>
@@ -443,6 +568,39 @@
     </ptl:mac>
     <ptl:ipv4 ptl:name="node7-interface1-ip">
       <ptl:item>192.168.115.1</ptl:item>
-    </ptl:ipv4>    
+    </ptl:ipv4> 
+    <ptl:mac ptl:name="node7-interface2-mac">
+      <ptl:item>00:24:8C:01:83:09</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node7-interface2-ip">
+      <ptl:item>192.168.116.1</ptl:item>
+    </ptl:ipv4> 
+
+    <ptl:mac ptl:name="node8-interface0-mac">
+      <ptl:item>00:24:8C:01:82:07</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node8-interface0-ip">
+      <ptl:item>192.168.112.2</ptl:item>
+    </ptl:ipv4>
+    <ptl:mac ptl:name="node8-interface1-mac">
+      <ptl:item>00:24:8C:01:83:10</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node8-interface1-ip">
+      <ptl:item>192.168.116.2</ptl:item>
+    </ptl:ipv4> 
+    <ptl:mac ptl:name="node8-interface2-mac">
+      <ptl:item>00:24:8C:01:83:11</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node8-interface2-ip">
+      <ptl:item>192.168.118.1</ptl:item>
+    </ptl:ipv4> 
+
+    <ptl:mac ptl:name="node9-interface0-mac">
+      <ptl:item>00:24:8C:01:90:05</ptl:item>
+    </ptl:mac>
+    <ptl:ipv4 ptl:name="node9-interface0-ip">
+      <ptl:item>192.168.118.2</ptl:item>
+    </ptl:ipv4>  
   </ptl:lists>
 </ptl:map>
+

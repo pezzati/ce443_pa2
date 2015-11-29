@@ -273,5 +273,33 @@ struct arp{
 
 
 
+
+
+struct mtp{
+    uint32_t type_label_zero;
+    uint32_t src_ip;
+    uint32_t dst_ip;
+} __attribute__ ((packed));
+
+#define MTP_TYPE_MASK      0xFF000000
+#define MTP_TYPE_SHIFT     24
+#define MTP_LABEL_MASK     0x00FFFFF0
+#define MTP_LABEL_SHIFT    4
+#define MTP_ZERO_MASK      0x0000000F
+#define MTP_ZERO_SHIFT     0
+
+
+#ifndef MTP_TYPE_REQ
+#define MTP_TYPE_REQ          0x01 /* MTP Request Type*/
+#endif
+
+#ifndef MTP_TYPE_REPLY
+#define MTP_TYPE_REPLY         0x02 /* MTP Reply Type*/
+#endif
+
+#ifndef MTP_TYPE_ACK
+#define MTP_TYPE_ACK          0x03 /* MTP Ack Type*/
+#endif
+
 #endif /* -- SR_PROTOCOL_H -- */
 

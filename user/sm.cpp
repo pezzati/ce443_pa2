@@ -111,6 +111,7 @@ vector<struct label_routing_node*> label_routing_table;
 
 //*************************************************Statics
 uint8_t broadcastMAC[6];
+int max_label;
 //*************************************************End of Statics
 
 
@@ -570,7 +571,8 @@ void SimulatedMachine::initialize () {
         break;
       }
 
-      case 'V': /*Interface-vpn*/{
+      case 'V': /*VRF*/{
+        max_label = 0;
         string input;
         while(true){
           if(input[0] != 'v')
@@ -597,6 +599,8 @@ void SimulatedMachine::initialize () {
             vrfi_temp->mask = ip_string_binary(input);
             ss >> input;
             vrfi_temp->vpn_label = atoi(input.c_str());
+            if(vrfi_temp->vpn_label > max_label)
+              max_label = vrfi_temp->vpn_label;
             ss >> input;
             vrfi_temp->egress_ip = ip_string_binary(input);
             ss >> input;
@@ -627,11 +631,20 @@ void SimulatedMachine::initialize () {
           }
           struct tunnel_node *tunnel_node_temp = new struct tunnel_node;
           tunnel_node_temp->ip = ip_string_binary(input);
+          
+          /*ss >> input;
+          tunnel_node_temp->lsp = atoi(input.c_str());
+          if(tunnel_node_temp->lsp > max-lsp)
+            max-lsp = tunnel_node_temp->lsp;*/
+
           ss >> input;
           if(input[0] == 'N')
             tunnel_node_temp->tunnel_label = -1;
-          else
+          else{
             tunnel_node_temp->tunnel_label = atoi(input.c_str());
+            if(tunnel_node_temp->tunnel_label > max_label)
+              max_label = tunnel_node_temp->tunnel_label;
+          }
           
           ss >> input;
           tunnel_node_temp->egress_interface = atoi(input.c_str());
@@ -767,26 +780,31 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
         cout << "the label of the packet with label " << ingress_label << " popped" <<endl;
         struct vrfi *vrfi_dest = getVRFi_by_label_vrf(ingress_label, vrf_table[target_router->vpn_name]);
-        //Frame *frame_temp = popLabel(data, frame_length);
+  
         uint8_t *data_temp = new uint8_t[frame.length - sizeof(struct mpls_label)];
         memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
         data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
         memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, frame.length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
         
-        struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
-        memcpy(ether_dest->ether_shost, ether_dest->ether_dhost, 6);
-        ether_dest->ether_type = htons(ETHERTYPE_IP);
+        if(vrfi_dest->ifaceIndex != -1){
+          struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
+          memcpy(ether_dest->ether_shost, ether_dest->ether_dhost, 6);
+          ether_dest->ether_type = htons(ETHERTYPE_IP);
 
-        Frame frame_temp(frame.length - sizeof(struct mpls_label), data_temp);
+          Frame frame_temp(frame.length - sizeof(struct mpls_label), data_temp);
 
-        struct msg_stored *msg_stored_temp = new struct msg_stored;
-        msg_stored_temp->data = new uint8_t[frame_temp.length];
-        msg_stored_temp->data = frame_temp.data;
-        msg_stored_temp->length = frame_temp.length;
-        arp_waiting_que[vrfi_dest->egress_ip] = msg_stored_temp;
+          struct msg_stored *msg_stored_temp = new struct msg_stored;
+          msg_stored_temp->data = new uint8_t[frame_temp.length];
+          msg_stored_temp->data = frame_temp.data;
+          msg_stored_temp->length = frame_temp.length;
+          arp_waiting_que[vrfi_dest->egress_ip] = msg_stored_temp;
 
-        sendARPReq(vrfi_dest->ifaceIndex, vrfi_dest->egress_ip);
-        return;
+          sendARPReq(vrfi_dest->ifaceIndex, vrfi_dest->egress_ip);
+          return;
+        }
+        else{
+          /* TODO MPLS again :)) */
+        }
       }
     }
     if(target_router->egress_label != -1){ /* change label*/
@@ -840,7 +858,9 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
   if(ntohs(ether->ether_type) == ETHERTYPE_IP){
     struct ip *iphdr = (struct ip*)(data + sizeof(struct sr_ethernet_hdr));
     //****** Get MSG *****//
-    if(ntohl(iphdr->ip_dst.s_addr) == iface[ifaceIndex].getIp()){
+    int neigh_index = getNeighbor(ntohl(iphdr->ip_dst.s_addr));
+
+    if(ntohl(iphdr->ip_dst.s_addr) == iface[ifaceIndex].getIp() || (neigh_index != -1 && ntohl(iphdr->ip_dst.s_addr) == iface[neigh_index].getIp())){
       if(iphdr->ip_p == IPPROTO_UDP){
         struct sr_udp *udp = (struct sr_udp*)(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip));
         if(ntohs(udp->port_src) == 5000  && ntohs(udp->port_dst) == 3000){
@@ -907,7 +927,8 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         return;
       }
       else{/*normal routing*/
-        int neigh_index = getNeighbor(ntohl(iphdr->ip_dst.s_addr)); /*check neighbors*/
+
+        //int neigh_index = getNeighbor(ntohl(iphdr->ip_dst.s_addr)); /*check neighbors*/
         if(neigh_index != -1){
           memcpy(ether->ether_shost, iface[neigh_index].mac, 6);
 
@@ -1027,6 +1048,19 @@ void SimulatedMachine::run () {
         sendARPReq(node->ifaceIndex, node->egress_ip);
         continue;
       }
+
+    }
+    if(command == "setup-tunnel"){
+      string str_destIp;
+      cin >> str_destIp;
+      uint32_t destIp = ip_string_binary(str_destIp);
+
+      struct default_node *default_temp = getDefault(destIp);
+      if(default_temp == NULL){
+        cout << "Destination is unreachable" << endl;
+        continue;
+      }
+      /*Frame *frame = cretaeMTP()*/
 
     }
   }
