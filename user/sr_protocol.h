@@ -276,17 +276,17 @@ struct arp{
 
 
 struct mtp{
-    uint32_t type_label_zero;
+    uint32_t tlz;
     uint32_t src_ip;
     uint32_t dst_ip;
 } __attribute__ ((packed));
 
 #define MTP_TYPE_MASK      0xFF000000
 #define MTP_TYPE_SHIFT     24
-#define MTP_LABEL_MASK     0x00FFFFF0
-#define MTP_LABEL_SHIFT    4
-#define MTP_ZERO_MASK      0x0000000F
-#define MTP_ZERO_SHIFT     0
+#define MTP_LABEL_MASK     0x000FFFFF
+#define MTP_LABEL_SHIFT    0
+#define MTP_ZERO_MASK      0x00F00000
+#define MTP_ZERO_SHIFT     20
 
 
 #ifndef MTP_TYPE_REQ

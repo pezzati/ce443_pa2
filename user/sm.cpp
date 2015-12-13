@@ -74,12 +74,14 @@ struct msg_stored
 {  
   uint8_t *data;
   int length;
+  bool isMsg;
+  string msg;
 };
 
 struct tunnel_node
 {
   uint32_t ip;
-  int lsp;
+  //int lsp;
   int tunnel_label;
   int egress_interface;
   uint8_t nextMAC[6];
@@ -95,6 +97,20 @@ struct label_routing_node
   string vpn_name;
   int egress_interface;
 };
+
+
+struct set_lsp{
+  int toDstInterface;
+  int toDstLabel;
+  uint8_t dstMAC[6];
+  bool dst_set;
+  int toSrcInterface;
+  int toSrcLabel;
+  uint8_t srcMAC[6];
+  bool src_set;
+  uint32_t src_ip;
+  uint32_t dst_ip;
+};
 //*************************************************End of structs
 
 
@@ -106,6 +122,7 @@ map<uint32_t, struct msg_stored*> arp_waiting_que;
 map<int, string> interface_vpn;
 vector<struct tunnel_node*> tunnel_table;
 vector<struct label_routing_node*> label_routing_table;
+map<uint32_t, struct set_lsp*> lsp_wating_list;
 /*map<uint32_t, > map;*/
 //*************************************************End of Vectors && Maps
 
@@ -116,6 +133,12 @@ int max_label;
 
 
 //********************************************************************************************Functions
+string int_to_str(int n){
+  std::ostringstream stm ;
+  stm << n ;
+  return stm.str() ;
+}
+
 uint32_t ip_string_binary(string str_gatewayIP){
   uint8_t ip_temp[4];
   int size = str_gatewayIP.length();
@@ -151,6 +174,45 @@ string ip_binary_string(uint32_t ip){
   return s;
 }
 
+void printTunnel(){
+  cout << "Tunnel Table" << endl;
+  cout << "IP            Tunnel-label egress-interface next-mac" << endl;
+  for(int i = 0; i < tunnel_table.size(); i++){
+    struct tunnel_node *node = tunnel_table.at(i);
+    cout << ip_binary_string(node->ip) << " " << node->tunnel_label;
+    cout << "           " << node->egress_interface << "                ";
+    for(int j = 0; j < 6; j++){
+      printf("%02x", node->nextMAC[j]);
+      if(j != 5)
+        cout << ":";
+    }
+    cout << endl;
+  }
+}
+
+void printLS(){
+  cout << "LS Table" << endl;
+  cout << "ingress-label egress-label egress-mac        egress-interface" << endl;
+  for(int i = 0; i < label_routing_table.size(); i++){
+    struct label_routing_node *node = label_routing_table.at(i);
+    cout << node->ingress_label << "            ";
+    if(node->egress_label == -1)
+      cout << "POP          ";
+    else
+      cout << node->egress_label << "           ";
+    if(!node->vpn){
+      for(int j = 0; j < 6; j++){
+        printf("%02x", node->nextMAC[j]);
+        if(j != 5)
+          cout << ":";
+      }
+      cout <<  " " << node->egress_interface;
+    }
+    else
+      cout << "v:" << node->vpn_name << "           " << "N/A";
+    cout << endl;
+  }
+}
 
 struct default_node* getDefault(uint32_t destIp){
   for(int i = 0; i < default_table.size(); i++){
@@ -243,7 +305,6 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
   ip_header.ip_tos = 0;
   ip_header.ip_id = htons((uint16_t)0);
   ip_header.ip_off = htons((uint16_t)0);
-  iface[ifaceIndex];
   ip_header.ip_src.s_addr = htonl(iface[ifaceIndex].getIp());
   ip_header.ip_dst.s_addr = htonl(destIp);
   ip_header.ip_p = IPPROTO_UDP;
@@ -498,12 +559,152 @@ Frame* SimulatedMachine::popLabel(uint8_t *data, int length){
   memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
   data = data + sizeof(struct sr_ethernet_hdr) + sizeof(struct mpls_label);
   memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
-  Frame frame_temp(length - sizeof(struct mpls_label), data_temp);
-  return &frame_temp;
+  Frame *frame_temp = new Frame(length - sizeof(struct mpls_label), data_temp);
+  return frame_temp;
 }
 
 
+struct mtp*  create_mtp(uint32_t destIp, uint32_t srcIp, uint8_t type, int label){
+  struct mtp *res = new struct mtp;
+  res->tlz = (uint32_t) type;
+  res->tlz = res->tlz << (MTP_TYPE_SHIFT - MTP_LABEL_SHIFT);
 
+  res->tlz  = res->tlz + (uint32_t)label;
+  res->tlz = res->tlz << (MTP_LABEL_SHIFT);
+  res->tlz = htonl(res->tlz);
+
+  res->src_ip = htonl(srcIp);
+  res->dst_ip = htonl(destIp);
+
+  return res;
+}
+
+Frame* SimulatedMachine::cretae_mtp_udp(uint32_t destIp, uint8_t *dstMAC, int ifaceIndex, int src_port, int dst_port, struct mtp *mtp_msg){
+  struct sr_udp udp_hdr;
+  udp_hdr.port_src = htons((uint16_t)src_port);
+  udp_hdr.port_dst = htons((uint16_t)dst_port);
+  udp_hdr.length = htons((uint16_t)(sizeof(sr_udp) + sizeof(struct mtp)));
+  udp_hdr.udp_sum = htons((uint16_t)0);
+
+  //IP
+  struct ip ip_header;
+  ip_header.ip_tos = 0;
+  ip_header.ip_id = htons((uint16_t)0);
+  ip_header.ip_off = htons((uint16_t)0);
+  ip_header.ip_src.s_addr = htonl(iface[ifaceIndex].getIp());
+  ip_header.ip_dst.s_addr = htonl(destIp);
+  ip_header.ip_p = IPPROTO_UDP;
+  ip_header.ip_ttl = 64;
+  ip_header.ip_hl = 5;
+  ip_header.ip_v = 4;
+  ip_header.ip_len = htons(sizeof(struct ip) + sizeof(struct sr_udp) + sizeof(struct mtp));
+  ip_header.ip_sum = 0x0000; 
+  ip_header.ip_sum = checksum((uint16_t *)&ip_header, sizeof(struct ip));
+
+  struct sr_ethernet_hdr ethernet_hdr;
+  memcpy(ethernet_hdr.ether_dhost, dstMAC, 6);
+  memcpy(ethernet_hdr.ether_shost, iface[ifaceIndex].mac, 6);
+  ethernet_hdr.ether_type = htons(ETHERTYPE_IP);
+
+  uint8_t *data = new uint8_t[sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp) + sizeof(struct mtp)];
+  memcpy(data, &ethernet_hdr, sizeof(struct sr_ethernet_hdr));
+  memcpy(data + sizeof(struct sr_ethernet_hdr), &ip_header, sizeof(struct ip));
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip), &udp_hdr, sizeof(struct sr_udp));
+  memcpy(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp), mtp_msg, sizeof(struct mtp));
+
+  Frame *frame = new Frame(sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp) + sizeof(struct mtp), data);
+  return frame;
+}
+
+void SimulatedMachine::sendMTP(uint8_t *data, int frame_length, int label, uint8_t type, struct default_node *next_node, int src_port){
+
+  struct sr_ethernet_hdr *ether = (struct sr_ethernet_hdr*)data;
+  struct ip *iphdr = (struct ip*)(data + sizeof(struct sr_ethernet_hdr));
+  struct sr_udp *udp = (struct sr_udp*)(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip));
+  struct mtp *mtp_msg = (struct mtp*)(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp));
+
+  mtp_msg->tlz = ntohl(mtp_msg->tlz);
+  /*set type to reply*/
+  mtp_msg->tlz = mtp_msg->tlz & ~MTP_TYPE_MASK;
+  mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)type << MTP_TYPE_SHIFT);
+  /*set label*/
+  mtp_msg->tlz = mtp_msg->tlz & ~MTP_LABEL_MASK;
+  mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)label << MTP_LABEL_SHIFT);
+
+  mtp_msg->tlz = htonl(mtp_msg->tlz);
+
+  udp->port_src = htons((uint16_t)src_port);
+  udp->port_dst = htons((uint16_t)(15000 - src_port));
+
+  iphdr->ip_src.s_addr = htonl(iface[next_node->ifaceIndex].getIp());
+  iphdr->ip_dst.s_addr = htonl(next_node->egress_ip);
+  iphdr->ip_sum = 0x0000; 
+  iphdr->ip_sum = checksum((uint16_t *)iphdr, sizeof(struct ip));
+
+  memcpy(ether->ether_dhost, ether->ether_shost, 6);
+  memcpy(ether->ether_shost, iface[next_node->ifaceIndex].mac, 6);
+  
+  Frame new_frame(frame_length, data);
+  sendFrame(new_frame, next_node->ifaceIndex);
+  if(type == MTP_TYPE_REPLY)
+    cout << "mtp reply with label " << label << " sent to " << ip_binary_string(next_node->egress_ip) << endl;
+}
+
+void SimulatedMachine::updateTables(struct set_lsp *lsp){
+  /*** Tunnel Table ***/
+  /* Src */
+  if(lsp->toSrcLabel != -1){ // we are not the src
+    struct tunnel_node *new_node = new struct tunnel_node;
+    new_node->ip = lsp->src_ip;
+    if(getNeighbor(lsp->src_ip) == -1)
+      new_node->tunnel_label = lsp->toSrcLabel;
+    else
+      new_node->tunnel_label = -1;
+    new_node->egress_interface = lsp->toSrcInterface;
+    memcpy(new_node->nextMAC, lsp->srcMAC, 6);
+    if(getTunnelNode(lsp->src_ip) == NULL)
+      tunnel_table.push_back(new_node);
+  
+  }
+  /* Dst */
+  if(lsp->toDstLabel != -1){ // we are not the dst
+    struct tunnel_node *new_node = new struct tunnel_node;
+    new_node->ip = lsp->dst_ip;
+    if(getNeighbor(lsp->dst_ip) == -1)
+      new_node->tunnel_label = lsp->toDstLabel;
+    else
+      new_node->tunnel_label = -1;
+    new_node->egress_interface = lsp->toDstInterface;
+    memcpy(new_node->nextMAC, lsp->dstMAC , 6);
+    if(getTunnelNode(lsp->dst_ip) == NULL)
+      tunnel_table.push_back(new_node);
+  }
+
+  /*** LS ***/
+  if(lsp->toDstLabel != -1 && lsp->toSrcLabel != -1){
+    struct label_routing_node *toSrc = new struct label_routing_node;
+    toSrc->vpn = false;
+    toSrc->ingress_label = lsp->toDstLabel;
+    if(getNeighbor(lsp->src_ip) == -1)
+      toSrc->egress_label = lsp->toSrcLabel;
+    else
+      toSrc->egress_label = -1;
+    toSrc->egress_interface = lsp->toSrcInterface;        
+    memcpy(toSrc->nextMAC, lsp->srcMAC, 6);
+    label_routing_table.push_back(toSrc);
+
+    struct label_routing_node *toDst = new struct label_routing_node;
+    toDst->vpn = false;
+    toDst->ingress_label = lsp->toSrcLabel;
+    if(getNeighbor(lsp->dst_ip) == -1)
+      toDst->egress_label = lsp->toDstLabel;
+    else
+      toDst->egress_label = -1;
+    toDst->egress_interface = lsp->toDstInterface;
+    memcpy(toDst->nextMAC, lsp->dstMAC, 6);
+    label_routing_table.push_back(toDst);
+  }
+}
 //********************************************************************************************End of Functions
 
 SimulatedMachine::SimulatedMachine (const ClientFramework *cf, int count) :
@@ -797,6 +998,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
           msg_stored_temp->data = new uint8_t[frame_temp.length];
           msg_stored_temp->data = frame_temp.data;
           msg_stored_temp->length = frame_temp.length;
+          msg_stored_temp->isMsg = false;
           arp_waiting_que[vrfi_dest->egress_ip] = msg_stored_temp;
 
           sendARPReq(vrfi_dest->ifaceIndex, vrfi_dest->egress_ip);
@@ -839,8 +1041,12 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
 
           sendFrame(frame_temp, ifaceIndex);
-          cout << "the packet for " <<  ip_binary_string(ntohl(ip_dest->ip_dst.s_addr)) << " forwarded to " << 
-                ip_binary_string(ntohl(arp->arp_ip_source)) << " on " << ifaceIndex << endl;
+          if(awaken_msg->isMsg)
+            cout << awaken_msg->msg << endl;
+          else
+            cout << "the packet for " <<  ip_binary_string(ntohl(ip_dest->ip_dst.s_addr)) << " forwarded to " << 
+                  ip_binary_string(ntohl(arp->arp_ip_source)) << " on " << ifaceIndex << endl;
+
           arp_waiting_que.erase(ntohl(arp->arp_ip_source));
           return;
         }
@@ -876,6 +1082,251 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
           cout << "A message from " << getIPString(ntohl(iphdr->ip_src.s_addr)) << " : " << msg << endl;
           return;
         }
+        /******** MTP ********/
+        if(ntohs(udp->port_dst) == 7000  || ntohs(udp->port_dst) == 8000){
+          struct mtp *mtp_msg = (struct mtp*)(data + sizeof(struct sr_ethernet_hdr) + sizeof(struct ip) + sizeof(struct sr_udp));
+          
+          uint32_t type = (ntohl(mtp_msg->tlz)) >> MTP_TYPE_SHIFT;
+          /* we are the Dest*/
+          if(type == (uint32_t)MTP_TYPE_REQ){
+            cout << "mtp requset from " << ip_binary_string(ntohl(mtp_msg->src_ip)) << " received" << endl;
+            struct set_lsp *lsp = new struct set_lsp;
+            lsp->src_ip = ntohl(mtp_msg->src_ip);
+            lsp->dst_ip = ntohl(mtp_msg->dst_ip);
+            lsp->dst_set = true;
+            lsp->toDstLabel = -1;
+            lsp->toDstInterface = -1;
+            lsp->src_set = false;
+
+            //memcpy(lsp->srcMAC, ether->ether_shost, 6);
+            lsp->toSrcLabel = max_label + 1;
+            lsp_wating_list[lsp->src_ip] = lsp;
+
+            max_label++;
+
+            mtp_msg->tlz = ntohl(mtp_msg->tlz);
+            /*set type to reply*/
+            mtp_msg->tlz = mtp_msg->tlz & ~MTP_TYPE_MASK;
+            mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)MTP_TYPE_REPLY << MTP_TYPE_SHIFT);
+            /*set label*/
+            mtp_msg->tlz = mtp_msg->tlz & ~MTP_LABEL_MASK;
+            mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)lsp->toSrcLabel << MTP_LABEL_SHIFT);
+
+            mtp_msg->tlz = htonl(mtp_msg->tlz);
+
+            struct default_node *next_node = getDefault(lsp->src_ip);
+            if(next_node == NULL)
+              return;
+            lsp->toSrcInterface = next_node->ifaceIndex;
+            //sendMTP(data, frame_length, , MTP_TYPE_REPLY, next_node, 8000);
+            Frame *new_frame = cretae_mtp_udp(next_node->egress_ip, ether->ether_shost, 
+                                next_node->ifaceIndex, 8000, 7000, mtp_msg); 
+            sendFrame(*new_frame, next_node->ifaceIndex);
+            cout << "mtp reply with label " << lsp->toSrcLabel << " sent to " << ip_binary_string(next_node->egress_ip) << endl;
+            return;
+          }
+          /***** MTP Reply *****/
+          if(type == (uint32_t)MTP_TYPE_REPLY){
+            uint32_t sug_label = (ntohl(mtp_msg->tlz) & MTP_LABEL_MASK) >> MTP_LABEL_SHIFT;
+            bool send_ack = true;
+
+            if(sug_label <= (uint32_t)max_label){
+              sug_label = (uint32_t)(max_label + 1);
+              max_label++;
+              send_ack = false;
+            }
+            else
+              max_label = sug_label + 1;
+
+
+            struct set_lsp *lsp = new struct set_lsp;
+            if(lsp_wating_list[ntohl(mtp_msg->src_ip)] == NULL){
+              lsp->src_ip = ntohl(mtp_msg->src_ip);
+              lsp->dst_ip = ntohl(mtp_msg->dst_ip);
+              lsp->dst_set = send_ack;
+              memcpy(lsp->dstMAC, ether->ether_shost, 6);
+              lsp->toDstLabel = sug_label;
+              lsp->toDstInterface = ifaceIndex;
+              lsp->src_set = false;
+              lsp->toSrcLabel = -1;
+              lsp_wating_list[lsp->src_ip] = lsp;
+            }
+            else{
+              lsp = lsp_wating_list[ntohl(mtp_msg->src_ip)];
+              if(ntohs(udp->port_dst) == 7000){
+                memcpy(lsp->dstMAC, ether->ether_shost, 6);
+                lsp->dst_set = send_ack;
+                lsp->toDstLabel = sug_label;
+                lsp->toDstInterface = ifaceIndex;
+              }
+              if(ntohs(udp->port_dst) == 8000){
+                memcpy(lsp->srcMAC, ether->ether_shost, 6);
+                lsp->src_set = send_ack;
+                lsp->toSrcLabel = sug_label;
+                lsp->toSrcInterface = ifaceIndex;
+              }
+            }
+
+            if(send_ack){
+              mtp_msg->tlz = ntohl(mtp_msg->tlz);
+              /*set type to reply*/
+              mtp_msg->tlz = mtp_msg->tlz & ~MTP_TYPE_MASK;
+              mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)MTP_TYPE_ACK << MTP_TYPE_SHIFT);
+
+              mtp_msg->tlz = htonl(mtp_msg->tlz);
+
+              Frame *new_frame = cretae_mtp_udp(ntohl(iphdr->ip_src.s_addr), ether->ether_shost, 
+                              ifaceIndex, ntohs(udp->port_dst), ntohs(udp->port_src), mtp_msg);
+              sendFrame(*new_frame, ifaceIndex);
+              cout << "mtp ack sent to " << ip_binary_string(ntohl(iphdr->ip_src.s_addr)) << endl;
+
+              if(ntohs(udp->port_dst) == 8000){
+                // TODO edit tables
+                updateTables(lsp);
+                return;
+              }
+              else{
+                if(ntohl(mtp_msg->src_ip) == iface[ifaceIndex].getIp()){
+                  lsp->toSrcLabel = -1;
+                  lsp->src_set = true;
+                  lsp->toSrcInterface = -1;
+                  // TODO edit tables
+                  updateTables(lsp);
+                  return;
+                }
+
+                sug_label = max_label + 1;
+                max_label++;
+
+                lsp->toSrcLabel = sug_label;
+
+                mtp_msg->tlz = ntohl(mtp_msg->tlz);
+                /*set type to reply*/
+                mtp_msg->tlz = mtp_msg->tlz & ~MTP_TYPE_MASK;
+                mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)MTP_TYPE_REPLY << MTP_TYPE_SHIFT);
+                /*set label*/
+                mtp_msg->tlz = mtp_msg->tlz & ~MTP_LABEL_MASK;
+                mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)sug_label << MTP_LABEL_SHIFT);
+
+                mtp_msg->tlz = htonl(mtp_msg->tlz);
+
+                int neigh_index = getNeighbor(lsp->src_ip);
+                if(neigh_index != -1){
+                  lsp->toSrcInterface = neigh_index;
+                  Frame *rep_frame = cretae_mtp_udp(iface[neigh_index].getIp(), broadcastMAC, neigh_index, 8000, 7000, mtp_msg);
+
+                  struct msg_stored *save_msg = new struct msg_stored;
+                  save_msg->data = rep_frame->data;
+                  save_msg->length = rep_frame->length;
+                  save_msg->isMsg = true;
+                  save_msg->msg = "mtp reply with label " + int_to_str(sug_label) + " sent to " + ip_binary_string(iface[neigh_index].getIp());
+                  arp_waiting_que[iface[neigh_index].getIp()] = save_msg;
+
+                  sendARPReq(neigh_index, iface[neigh_index].getIp());
+                  return;
+                }
+                struct default_node *next_node = getDefault(lsp->src_ip);
+                if(next_node == NULL)
+                  return;
+                lsp->toSrcInterface = next_node->ifaceIndex;
+                Frame *rep_frame = cretae_mtp_udp(next_node->egress_ip, broadcastMAC, next_node->ifaceIndex, 8000, 7000, mtp_msg);
+
+                struct msg_stored *save_msg = new struct msg_stored;
+                save_msg->data = rep_frame->data;
+                save_msg->length = rep_frame->length;
+                save_msg->isMsg = true;
+                save_msg->msg = "mtp reply with label " + int_to_str(sug_label) + " sent to " + ip_binary_string(next_node->egress_ip);
+                arp_waiting_que[next_node->egress_ip] = save_msg;
+
+                sendARPReq(next_node->ifaceIndex, next_node->egress_ip);
+                return;
+              }
+                
+            }
+            else{
+              mtp_msg->tlz = ntohl(mtp_msg->tlz);
+              /*set label*/
+              mtp_msg->tlz = mtp_msg->tlz & ~MTP_LABEL_MASK;
+              mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)sug_label << MTP_LABEL_SHIFT);
+
+              mtp_msg->tlz = htonl(mtp_msg->tlz);
+
+              Frame *new_frame = cretae_mtp_udp(ntohl(iphdr->ip_src.s_addr), ether->ether_shost, 
+                              ifaceIndex, ntohs(udp->port_dst), ntohs(udp->port_src), mtp_msg);
+              sendFrame(*new_frame, ifaceIndex);
+              cout << "mtp reply with label " << lsp->toDstLabel << " sent to " << ip_binary_string(ntohl(iphdr->ip_src.s_addr)) << endl;
+              return;
+            }
+            return;
+          }
+
+          if(type == (uint32_t)MTP_TYPE_ACK){
+            if(lsp_wating_list[ntohl(mtp_msg->src_ip)] == NULL)
+              return;
+            struct set_lsp *lsp = new struct set_lsp;
+            lsp = lsp_wating_list[ntohl(mtp_msg->src_ip)];
+
+            if(ntohs(udp->port_dst) == 8000){
+              lsp->src_set = true;
+              lsp->toSrcInterface = ifaceIndex;
+              memcpy(lsp->srcMAC, ether->ether_shost, 6);
+              // TODO edit tables
+              updateTables(lsp);
+              return;
+            }
+            if(ntohs(udp->port_dst) == 7000){
+              lsp->dst_set = true;
+              lsp->toDstInterface = ifaceIndex;
+              memcpy(lsp->dstMAC, ether->ether_shost, 6);
+              int sug_label = max_label + 1;
+              max_label++;
+
+              lsp->toSrcLabel = sug_label;
+
+              mtp_msg->tlz = ntohl(mtp_msg->tlz);
+              /*set type to reply*/
+              mtp_msg->tlz = mtp_msg->tlz & ~MTP_TYPE_MASK;
+              mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)MTP_TYPE_REPLY << MTP_TYPE_SHIFT);
+              /*set label*/
+              mtp_msg->tlz = mtp_msg->tlz & ~MTP_LABEL_MASK;
+              mtp_msg->tlz = mtp_msg->tlz | ((uint32_t)sug_label << MTP_LABEL_SHIFT);
+
+              mtp_msg->tlz = htonl(mtp_msg->tlz);
+
+              int neigh_index = getNeighbor(lsp->src_ip);
+              if(neigh_index != -1){
+                lsp->toSrcInterface = neigh_index;
+                Frame *rep_frame = cretae_mtp_udp(lsp->src_ip, broadcastMAC, neigh_index, 8000, 7000, mtp_msg);
+
+                struct msg_stored *save_msg = new struct msg_stored;
+                save_msg->data = rep_frame->data;
+                save_msg->length = rep_frame->length;
+                save_msg->isMsg = true;
+                save_msg->msg = "mtp reply with label " + int_to_str(sug_label) + " sent to " + ip_binary_string(lsp->src_ip);
+                arp_waiting_que[lsp->src_ip] = save_msg;
+
+                sendARPReq(neigh_index, lsp->src_ip);
+                return;
+              }
+
+              struct default_node *next_node = getDefault(lsp->src_ip);
+              if(next_node == NULL)
+                return;
+              lsp->toSrcInterface = next_node->ifaceIndex;
+              Frame *rep_frame = cretae_mtp_udp(next_node->egress_ip, broadcastMAC, next_node->ifaceIndex, 8000, 7000, mtp_msg);
+
+              struct msg_stored *save_msg = new struct msg_stored;
+              save_msg->data = rep_frame->data;
+              save_msg->length = rep_frame->length;
+              save_msg->isMsg = true;
+              save_msg->msg = "mtp reply with label " + int_to_str(sug_label) + " sent to " + ip_binary_string(next_node->egress_ip);
+              arp_waiting_que[next_node->egress_ip] = save_msg;
+
+              sendARPReq(next_node->ifaceIndex, next_node->egress_ip);
+              return;
+            }
+          }
+        }
       }
     }
     //****** End of Get MSG *****//
@@ -896,6 +1347,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
             struct msg_stored *msg_stored_temp = new struct msg_stored;
             msg_stored_temp->data = data;
             msg_stored_temp->length = frame_length;
+            msg_stored_temp->isMsg = false;
             arp_waiting_que[vrfi_dest->egress_ip] = msg_stored_temp;
 
             sendARPReq(vrfi_dest->ifaceIndex, vrfi_dest->egress_ip);
@@ -936,6 +1388,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
           struct msg_stored *save_msg = new struct msg_stored;
           save_msg->data = data;
           save_msg->length = frame_length;
+          save_msg->isMsg = false;
           arp_waiting_que[ntohl(iphdr->ip_dst.s_addr)] = save_msg;
 
           sendARPReq(neigh_index, ntohl(iphdr->ip_dst.s_addr));
@@ -944,7 +1397,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         //Search in default table
         struct default_node *node = getDefault(ntohl(iphdr->ip_dst.s_addr));
         if(node == NULL){
-          cout << "Destination is unreachable" << endl;
+          //cout << "Destination is unreachable" << endl;
           return;
         }
         memcpy(ether->ether_shost, iface[node->ifaceIndex].mac, 6);
@@ -952,6 +1405,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         struct msg_stored *msg_stored_temp = new struct msg_stored;
         msg_stored_temp->data = data;
         msg_stored_temp->length = frame_length;
+        msg_stored_temp->isMsg = false;
         arp_waiting_que[node->egress_ip] = msg_stored_temp;
 
         sendARPReq(node->ifaceIndex, node->egress_ip);
@@ -995,7 +1449,7 @@ void SimulatedMachine::run () {
           struct msg_stored *save_msg = new struct msg_stored;
           save_msg->data = frame->data;
           save_msg->length = frame->length;
-
+          save_msg->isMsg = false;
           arp_waiting_que[destIp] = save_msg;
           sendARPReq(vrfi_dest->ifaceIndex, destIp);
           continue;
@@ -1024,7 +1478,7 @@ void SimulatedMachine::run () {
           Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, neigh_index, -1, -1, msg);
           save_msg->data = frame->data;
           save_msg->length = frame->length;
-
+          save_msg->isMsg = false;
           arp_waiting_que[destIp] = save_msg;
 
           sendARPReq(neigh_index, destIp);
@@ -1033,7 +1487,7 @@ void SimulatedMachine::run () {
         //Search in default table
         struct default_node *node = getDefault(destIp);
         if(node == NULL){
-          cout << "Destination is unreachable" << endl;
+          //cout << "Destination is unreachable" << endl;
           continue;
         }
 
@@ -1042,7 +1496,7 @@ void SimulatedMachine::run () {
         Frame *frame = createMPLS_IP_packet(destIp, broadcastMAC, node->ifaceIndex, -1, -1, msg);
         save_msg->data = frame->data;
         save_msg->length = frame->length;
-
+        save_msg->isMsg = false;
         arp_waiting_que[node->egress_ip] = save_msg;
 
         sendARPReq(node->ifaceIndex, node->egress_ip);
@@ -1055,13 +1509,29 @@ void SimulatedMachine::run () {
       cin >> str_destIp;
       uint32_t destIp = ip_string_binary(str_destIp);
 
+      if(getTunnelNode(destIp) != NULL)
+        continue;
+
       struct default_node *default_temp = getDefault(destIp);
       if(default_temp == NULL){
-        cout << "Destination is unreachable" << endl;
+        //cout << "Destination is unreachable" << endl;
         continue;
       }
-      /*Frame *frame = cretaeMTP()*/
+      struct mtp *mtp_msg = create_mtp(destIp, iface[default_temp->ifaceIndex].getIp(), MTP_TYPE_REQ, 0);
+      Frame *frame = cretae_mtp_udp(destIp, broadcastMAC, default_temp->ifaceIndex, 7000, 8000, mtp_msg);
 
+      struct msg_stored *save_msg = new struct msg_stored;
+      save_msg->data = frame->data;
+      save_msg->length = frame->length;
+      save_msg->isMsg = false;
+      arp_waiting_que[default_temp->egress_ip] = save_msg;
+
+      sendARPReq(default_temp->ifaceIndex, default_temp->egress_ip);
+      continue;
+    }
+    if(command == "print-tunnels"){
+      printTunnel();
+      printLS();
     }
   }
 }

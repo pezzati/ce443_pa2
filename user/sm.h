@@ -56,6 +56,9 @@ public:
 	int getNeighbor(uint32_t ip);
 	Frame* addLabel(uint8_t *data, int frame_length, uint8_t *nextMAC, int vpn_label, int tunnel_table, uint32_t dest_ip);
 	Frame* popLabel(uint8_t *data, int length);
+	Frame* cretae_mtp_udp(uint32_t destIp, uint8_t *dstMAC, int ifaceIndex, int src_port, int dst_port, struct mtp *mtp_msg);
+	void updateTables(struct set_lsp *lsp);
+	void sendMTP(uint8_t *data, int frame_length, int label, uint8_t type, struct default_node *next_node, int src_port);
 };
 
 #endif /* sm.h */
