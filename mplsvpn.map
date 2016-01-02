@@ -266,7 +266,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 40         192.168.115.2 N/A</ptl:value>
               <ptl:value>192.168.111.0 255.255.255.240 35         192.168.113.1 N/A</ptl:value>
-              <ptl:value>192.168.118.0 255.255.255.240 30         192.168.118.1 2</ptl:value>
+              <ptl:value>192.168.118.0 255.255.255.240 30         192.168.118.2 2</ptl:value>
               <ptl:value>vpn-B</ptl:value>
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
               <ptl:value>192.168.117.0 255.255.255.240 41         192.168.113.1 N/A</ptl:value>
@@ -603,3 +603,4 @@
     </ptl:ipv4>  
   </ptl:lists>
 </ptl:map>
+

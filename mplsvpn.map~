@@ -2,16 +2,16 @@
 <ptl:map xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ptl="http://partov.ce.sharif.edu/2013/PTL/Map" xsi:schemaLocation="http://partov.ce.sharif.edu/2013/PTL/Map map.xsd" ptl:name="mplsvpn" ptl:version="3.4" ptl:count="50">
 
   <ptl:links>
-      <ptl:link ptl:name="lk-node-0" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-1" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-2" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-3" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-4" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-5" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-6" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-7" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-8" ptl:protocol="802.3" ptl:log="true"></ptl:link>
-      <ptl:link ptl:name="lk-node-9" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node0-node1" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node1-node2" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node7-node3" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node3-node4" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node1-node5" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node3-node6" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node2-node7" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node2-node8" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node7-node8" ptl:protocol="802.3" ptl:log="true"></ptl:link>
+      <ptl:link ptl:name="lk-node8-node9" ptl:protocol="802.3" ptl:log="true"></ptl:link>
   </ptl:links>
 
   <ptl:nodes>
@@ -21,7 +21,7 @@
           <ptl:mac-address-ref>node0-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node0-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-0" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node0-node1" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -39,7 +39,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -53,19 +53,19 @@
           <ptl:mac-address-ref>node1-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node1-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.252</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-0" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node0-node1" ptl:running="true"/>
         </ptl:ethernet-interface>
   <ptl:ethernet-interface>
           <ptl:mac-address-ref>node1-interface1-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node1-interface1-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-1" ptl:running="true"/>
+      <ptl:connected-to-link ptl:name="lk-node1-node2" ptl:running="true"/>
         </ptl:ethernet-interface>
   <ptl:ethernet-interface>
           <ptl:mac-address-ref>node1-interface2-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node1-interface2-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.252</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-4" ptl:running="true"/>
+      <ptl:connected-to-link ptl:name="lk-node1-node5" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -95,7 +95,7 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
               <ptl:value>192.168.115.2 50           1                00:24:8C:01:82:01</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
@@ -113,19 +113,19 @@
           <ptl:mac-address-ref>node2-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node2-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-1" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node1-node2" ptl:running="true"/>
         </ptl:ethernet-interface>
         <ptl:ethernet-interface>
           <ptl:mac-address-ref>node2-interface1-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node2-interface1-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-        <ptl:connected-to-link ptl:name="lk-node-6" ptl:running="true"/>
+        <ptl:connected-to-link ptl:name="lk-node2-node7" ptl:running="true"/>
         </ptl:ethernet-interface>
         <ptl:ethernet-interface>
           <ptl:mac-address-ref>node2-interface2-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node2-interface2-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-7" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node2-node8" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -153,7 +153,7 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
               <ptl:value>192.168.115.2 55           1                00:24:8C:01:82:06</ptl:value>
               <ptl:value>192.168.113.1 N/A          0                00:24:8C:01:81:01</ptl:value>
 
@@ -172,19 +172,19 @@
           <ptl:mac-address-ref>node7-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node7-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-6" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node2-node7" ptl:running="true"/>
         </ptl:ethernet-interface>
         <ptl:ethernet-interface>
           <ptl:mac-address-ref>node7-interface1-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node7-interface1-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-2" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node7-node3" ptl:running="true"/>
         </ptl:ethernet-interface>
         <ptl:ethernet-interface>
           <ptl:mac-address-ref>node7-interface2-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node7-interface2-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-8" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node7-node8" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -212,7 +212,7 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
               <ptl:value>192.168.113.1 55           0                00:24:8C:01:83:01</ptl:value>
               <ptl:value>192.168.115.2 N/A          1                00:24:8C:01:84:01</ptl:value>
 
@@ -232,19 +232,19 @@
           <ptl:mac-address-ref>node8-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node8-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-7" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node2-node8" ptl:running="true"/>
         </ptl:ethernet-interface>
   <ptl:ethernet-interface>
           <ptl:mac-address-ref>node8-interface1-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node8-interface1-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-8" ptl:running="true"/>
+      <ptl:connected-to-link ptl:name="lk-node7-node8" ptl:running="true"/>
         </ptl:ethernet-interface>
   <ptl:ethernet-interface>
           <ptl:mac-address-ref>node8-interface2-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node8-interface2-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.252</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-9" ptl:running="true"/>
+      <ptl:connected-to-link ptl:name="lk-node8-node9" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -273,7 +273,7 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.115.2 N/A</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -289,7 +289,7 @@
           <ptl:mac-address-ref>node9-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node9-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-9" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node8-node9" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -307,7 +307,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -323,19 +323,19 @@
           <ptl:mac-address-ref>node3-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node3-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-2" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node7-node3" ptl:running="true"/>
         </ptl:ethernet-interface>
   <ptl:ethernet-interface>
           <ptl:mac-address-ref>node3-interface1-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node3-interface1-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-3" ptl:running="true"/>
+      <ptl:connected-to-link ptl:name="lk-node3-node4" ptl:running="true"/>
         </ptl:ethernet-interface>
   <ptl:ethernet-interface>
           <ptl:mac-address-ref>node3-interface2-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node3-interface2-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-      <ptl:connected-to-link ptl:name="lk-node-5" ptl:running="true"/>
+      <ptl:connected-to-link ptl:name="lk-node3-node6" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -365,7 +365,7 @@
               <ptl:value>192.168.111.0 255.255.255.240 36         192.168.111.2 2</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
               <ptl:value>192.168.113.1 60           0                00:24:8C:01:83:08</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
@@ -382,7 +382,7 @@
           <ptl:mac-address-ref>node4-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node4-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-3" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node3-node4" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -400,7 +400,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -414,7 +414,7 @@
           <ptl:mac-address-ref>node5-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node5-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-4" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node1-node5" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -431,7 +431,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
@@ -445,7 +445,7 @@
           <ptl:mac-address-ref>node6-interface0-mac</ptl:mac-address-ref>
           <ptl:ip-address-ref>node6-interface0-ip</ptl:ip-address-ref>
           <ptl:netmask>255.255.255.0</ptl:netmask>
-          <ptl:connected-to-link ptl:name="lk-node-5" ptl:running="true"/>
+          <ptl:connected-to-link ptl:name="lk-node3-node6" ptl:running="true"/>
         </ptl:ethernet-interface>
       </ptl:interfaces>
       <ptl:parameters>
@@ -462,7 +462,7 @@
               <ptl:value>IP            MASK            vpn-label  out-ip        egress-interface</ptl:value>
 
             <ptl:value>Tunnel Table</ptl:value>
-              <ptl:value>IP            Tunnel-tabel egress-interface next-mac</ptl:value>
+              <ptl:value>IP            Tunnel-label egress-interface next-mac</ptl:value>
 
             <ptl:value>LS Table</ptl:value>
               <ptl:value>ingress-label egress-label egress-mac        egress-interface</ptl:value>
