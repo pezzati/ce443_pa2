@@ -335,7 +335,19 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
   struct mpls_label *mpls_tunnel = new struct mpls_label;
   int vpn_size = 0;
   int tunnel_size = 0;
+
   if(vpn_label != -1){
+    uint32_t out_ip = 0;
+    for(int i = 0; i < vrf_name.size(); i++){
+      struct vrf *temp_vrf = vrf_table[vrf_name.at(i)];
+      struct vrfi *temp_vrfi = getVRFi_by_label_vrf(vpn_label, temp_vrf);
+      if(temp_vrfi != NULL){
+        out_ip = temp_vrfi->egress_ip;
+        break;
+      }
+    }
+
+
     vpn_size = 4;
     //value
     mpls_vpn->entry = vpn_label;
@@ -349,11 +361,21 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
     //TTL
     mpls_vpn->entry = mpls_vpn->entry + (uint32_t)0;
     // TODO Correct it
-    cout << "the label " << vpn_label << " added to " << ip_binary_string(destIp) << endl;
+    cout << "the label " << vpn_label << " added to " << ip_binary_string(out_ip) << endl;
 
     mpls_vpn->entry = htonl(mpls_vpn->entry);
   }
   if(tunnel_label != -1){
+    uint32_t out_ip = 0;
+    for(int i = 0; i < vrf_name.size(); i++){
+      struct vrf *temp_vrf = vrf_table[vrf_name.at(i)];
+      struct vrfi *temp_vrfi = getVRFi_by_label_vrf(vpn_label, temp_vrf);
+      if(temp_vrfi != NULL){
+        out_ip = temp_vrfi->egress_ip;
+        break;
+      }
+    }
+
     tunnel_size = 4;
     //value
     mpls_tunnel->entry = tunnel_label;
@@ -369,7 +391,7 @@ Frame* SimulatedMachine::createMPLS_IP_packet(uint32_t destIp, uint8_t *destMac,
     //TTL
     mpls_tunnel->entry = mpls_tunnel->entry + (uint32_t)0;
 
-    cout << "the label " << tunnel_label << " added to " << ip_binary_string(destIp) << endl;
+    cout << "the label " << tunnel_label << " added to " << ip_binary_string(out_ip) << endl;
 
     mpls_tunnel->entry = htonl(mpls_tunnel->entry);
   }
@@ -473,7 +495,6 @@ void SimulatedMachine::forwardMPLSPacket(uint8_t *data, int length, struct label
 
 
   struct sr_ethernet_hdr *ether = (struct sr_ethernet_hdr*)(data);
-  memcpy(ether->ether_shost, ether->ether_dhost, 6);
   memcpy(ether->ether_dhost, target_router->nextMAC, 6);
 
   Frame frame( length, data);
@@ -494,7 +515,6 @@ void printBinary(uint32_t entry){
 
 Frame* SimulatedMachine::addLabel(uint8_t *data, int frame_length, uint8_t *nextMAC, int vpn_label, int tunnel_label, uint32_t dest_ip){
   struct sr_ethernet_hdr *ether = (struct sr_ethernet_hdr*)data;
-  memcpy(ether->ether_shost, ether->ether_dhost, 6);
   memcpy(ether->ether_dhost, nextMAC, 6);
   if(vpn_label != -1 || tunnel_label != -1)
     ether->ether_type = htons(ETHERTYPE_MPLS);
@@ -801,6 +821,7 @@ void SimulatedMachine::initialize () {
           }
           struct vrf *vrf_temp = new struct vrf;
           vrf_temp->vpn_name = input;
+          vrf_name.push_back(input);
           for(int i =
            0; i < 5; i++)
             ss >> input;
@@ -976,7 +997,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         memcpy(data_temp + sizeof(struct sr_ethernet_hdr), data, frame.length - sizeof(struct sr_ethernet_hdr) - sizeof(struct mpls_label));
         
         struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
-        memcpy(ether_dest->ether_shost, ether_dest->ether_dhost, 6);
+        memcpy(ether_dest->ether_shost, iface[target_router->egress_interface].mac, 6);
         memcpy(ether_dest->ether_dhost, target_router->nextMAC, 6);
 
 
@@ -995,6 +1016,8 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
 
         cout << "the label of the packet with label " << ingress_label << " popped" <<endl;
         struct vrfi *vrfi_dest = getVRFi_by_label_vrf(ingress_label, vrf_table[target_router->vpn_name]);
+        if(vrfi_dest == NULL)
+          return;
   
         uint8_t *data_temp = new uint8_t[frame.length - sizeof(struct mpls_label)];
         memcpy(data_temp, data, sizeof(struct sr_ethernet_hdr));
@@ -1003,7 +1026,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         
         if(vrfi_dest->ifaceIndex != -1){
           struct sr_ethernet_hdr *ether_dest = (struct sr_ethernet_hdr*)data_temp;
-          memcpy(ether_dest->ether_shost, ether_dest->ether_dhost, 6);
+          memcpy(ether_dest->ether_shost, iface[vrfi_dest->ifaceIndex].mac, 6);
           ether_dest->ether_type = htons(ETHERTYPE_IP);
 
           Frame frame_temp(frame.length - sizeof(struct mpls_label), data_temp);
@@ -1024,6 +1047,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
       }
     }
     if(target_router->egress_label != -1){ /* change label*/
+      memcpy(ether->ether_shost, iface[target_router->egress_interface].mac, 6);
       forwardMPLSPacket(data, frame.length, target_router);
       return;
     }
@@ -1384,6 +1408,7 @@ void SimulatedMachine::processFrame (Frame frame, int ifaceIndex) {
         struct tunnel_node *tunnel_dest = getTunnelNode(vrfi_dest->egress_ip);
         if(tunnel_dest == NULL)
           return;
+        memcpy(ether->ether_shost, iface[tunnel_dest->egress_interface].mac, 6);
         Frame *frame_temp = addLabel(data, frame_length, tunnel_dest->nextMAC, vrfi_dest->vpn_label, tunnel_dest->tunnel_label, vrfi_dest->egress_ip);
         if(vrfi_dest->vpn_label != -1 || tunnel_dest->tunnel_label != -1){
           int out_label = tunnel_dest->tunnel_label;
@@ -1450,7 +1475,7 @@ void SimulatedMachine::run () {
       uint32_t destIp = ip_string_binary(str_destIp);
       
       //if vrf index equals to '--' this means target send it non VPN or in its VPN
-      if(str_vrfIndex != "--"){
+      if(str_vrfIndex != "N/A"){
         //Search vrf_table
         struct vrf *vrf_dest = vrf_table[str_vrfIndex];
         if(vrf_dest == NULL){
