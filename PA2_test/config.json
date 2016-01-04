@@ -1,0 +1,22 @@
+{
+	"cf_path": "/home/pezzati/Desktop/University/09term/TAnet/tester/PA2_cf",
+    	"my_router_target": "Mycf.out",
+    	"router_target": "cf.out",
+	"partov_server": {
+		"ip": "213.233.169.80",
+		"port": 7890,
+		"iface": "wlan0",
+		"node_prefix": "client-",
+		"renew_server": false
+	},
+	"loggers": [
+		{
+			"type": "base.logger.PrettyLogger",
+			"output": "stdout"
+		},
+		{
+			"type": "base.logger.PlainLogger",
+			"output": "log.out"
+		}
+	]
+}

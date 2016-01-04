@@ -1,0 +1,34 @@
+To setup the test environment:
+0. Change your current directory to the same directory containing this README.
+	cd /path/to/here
+1. Install dependencies:
+	apt-get install tcpdump python-virtualenv
+2. Setup the virtualenv:
+	virtualenv -p /bin/python2 venv
+3. Set required permissions for running binaries:
+	sudo setcap 'CAP_NET_RAW+eip' venv/bin/python2
+	sudo setcap 'CAP_NET_RAW+eip' `which tcpdump`
+4. Activate the virtualenv:
+	source venv/bin/activate
+5. Install scapy:
+	pip install scapy==2.3.1
+6. Place your code in `PA1-cf` and compile it
+7. Set these variables in `tester/config.json`:
+	cf_path: absolute path to the `PA1-cf` directory containing your code
+	iface: set this to the interface name that connects to Partov. You should find it by running `ifconfig` command. (e.g. eth0, wlan0)
+8. Use "noc" as map name in info.sh.
+
+
+
+To run the tests:
+1. Activate the virtualenv:
+	source venv/bin/activate
+2. Run the evaluation script:
+	`./run_tests.sh`
+3. Results will be stored in the log folder and has the following structure:
+	log/errors/method_name.log: Assertion errors that your code faced during running each test method. These logs could help you to debug your codes.
+	pcaps/method_name.cap: captured packets during running each test scenario.
+
+
+
+Please note that you can only run your own codes and have not access to true codes. 
